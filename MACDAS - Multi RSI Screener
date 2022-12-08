@@ -1,0 +1,242 @@
+//@version=5
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║ © www.huseyingulen.net                                                       ║
+// ║                                                                              ║
+// ║ MACDAS                                                                       ║
+// ║ Multi Timeframe RSI Screener                                                 ║
+// ║                                                                              ║
+// ║ developer : hypeupgradeTR                                                    ║    
+// ║ creators  : danube, noop42                                                   ║
+// ║                                                                              ║
+// ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
+// ║ at https://mozilla.org/MPL/2.0/                                              ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+// ╔══════════════════════════════════════╗
+// ║                                      ║
+// ║     colors                           ║
+// ║                                      ║
+// ╚══════════════════════════════════════╝
+
+
+// v3 Style Gradient
+GRN01 = #7CFC00, GRN02 = #32CD32, GRN03 = #228B22, GRN04 = #006400, GRN05 = #008000, GRN06=#093507
+RED01 = #FF4500, RED02 = #FF0000, RED03 = #B22222, RED04 = #8B0000, RED05 = #800000, RED06=#330d06
+
+// ──────────[ v3 Style Colors ]
+AQUA    = #00FFFF
+BLACK   = #000000
+BLUE    = #0000FF
+FUCHSIA = #FF00FF
+GRAY    = #808080
+GREEN   = #008000
+LIME    = #00FF00
+MAROON  = #800000
+NAVY    = #000080
+OLIVE   = #808000
+ORANGE  = #FF7F00
+PURPLE  = #800080
+RUBI    = #FF0000
+SILVER  = #C0C0C0
+TEAL    = #008080
+YELLOW  = #FFFF00
+WHITE   = #FFFFFF
+
+// ╔══════════════════════════════════════╗
+// ║                                      ║
+// ║     indicator functions              ║
+// ║                                      ║
+// ╚══════════════════════════════════════╝
+
+
+indicator(title="MACDAS - Multi RSI Screener", format=format.price, precision=2)
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (macdas)                                                      ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+fastperiod = input.int(12, title='fastperiod', minval=1, maxval=500, group='=== MACDAS SETTINGS ===')
+slowperiod = input.int(26, title='slowperiod', minval=1, maxval=500, group='=== MACDAS SETTINGS ===')
+signalperiod = input.int(9, title='signalperiod', minval=1, maxval=500, group='=== MACDAS SETTINGS ===')
+fastMA = ta.ema(close, fastperiod)
+slowMA = ta.ema(close, slowperiod)
+macd = fastMA - slowMA
+signal = ta.ema(macd, signalperiod)
+macdAS = macd - signal
+signalAS = ta.ema(macdAS, signalperiod)
+spanColor = macdAS >= signalAS ? color.rgb(0, 226, 255) : color.rgb(242, 54, 69)
+p1 = plot(macdAS, title='macdAS', style=plot.style_histogram, linewidth=1, color=spanColor)
+p2 = plot(signalAS, title='signalAS', style=plot.style_histogram, linewidth=1, color=spanColor)
+plot(0, color=color.new(color.silver, 0), linewidth=3)
+long = ta.crossover(macdAS, signalAS)
+short = ta.crossunder(macdAS, signalAS)
+plotshape(long, title='Long', color=color.new(#00e2ff, 20), style=shape.triangleup, location=location.bottom, size=size.small)
+plotshape(short, title='Short', color=color.new(#f23645, 20), style=shape.triangledown, location=location.top, size=size.small)
+fill(p1, p2, color=spanColor, title='Fill', transp=20)
+alertcondition(long or short, title='Signal Alert', message='SIGNAL')
+alertcondition(long, title='Long Alert', message='Long')
+alertcondition(short, title='Short Alert', message='Short')
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (macdas)                                                     ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (rsi screener)                                                ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// Input parameters
+src = input(close, title='Source')
+repainting = input.bool(title='Allow repaint ? (enabled = live values)', defval=true, group='=== RSI SCREENER SETTINGS ===')
+show_screener = input.bool(title='Show Screener', defval=false, group='=== RSI SCREENER SETTINGS ===')
+show_lines = input.bool(title='Show RSI lines ?', defval=false, group='=== RSI SCREENER SETTINGS ===')
+
+tf1 = input.timeframe(title='Timeframe 1', defval='5', group='=== RSI SCREENER SETTINGS ===')
+tf2 = input.timeframe(title='Timeframe 2', defval='15', group='=== RSI SCREENER SETTINGS ===')
+tf3 = input.timeframe(title='Timeframe 3', defval='60', group='=== RSI SCREENER SETTINGS ===')
+tf4 = input.timeframe(title='Timeframe 4', defval='240', group='=== RSI SCREENER SETTINGS ===')
+
+tf1_cvg_opt = input.bool(true, 'Include Timeframe #1 in convergence signals', group='=== RSI SCREENER SETTINGS ===')
+tf2_cvg_opt = input.bool(true, 'Include Timeframe #2 in convergence signals', group='=== RSI SCREENER SETTINGS ===')
+tf3_cvg_opt = input.bool(true, 'Include Timeframe #3 in convergence signals', group='=== RSI SCREENER SETTINGS ===')
+tf4_cvg_opt = input.bool(false, 'Include Timeframe #4 in convergence signals', group='=== RSI SCREENER SETTINGS ===')
+
+lengthRSI = input.int(14, 'RSI Length', minval=1, group='RSI')
+rsi_low = input.int(30, title='RSI Oversold Level', group='RSI')
+rsi_high = input.int(70, title='RSI Overbought Level', group='RSI')
+
+// Custom functions
+rp_security(_symbol, _res, _src) =>
+    request.security(_symbol, _res, _src[barstate.isrealtime ? repainting ? 0 : 1 : 0], gaps=barmerge.gaps_off)
+get_movement(rsi) =>
+    rsi > rsi[1] ? 'Bull' : 'Bear'
+show_drawings(data) =>
+    show_lines ? data : na
+
+// MTF RSI
+rsi_tf1 = rp_security(syminfo.tickerid, tf1, ta.rsi(src, lengthRSI))
+rsi_tf2 = rp_security(syminfo.tickerid, tf2, ta.rsi(src, lengthRSI))
+rsi_tf3 = rp_security(syminfo.tickerid, tf3, ta.rsi(src, lengthRSI))
+rsi_tf4 = rp_security(syminfo.tickerid, tf4, ta.rsi(src, lengthRSI))
+
+rsi1ob = rsi_tf1 > rsi_high
+rsi1os = rsi_tf1 < rsi_low
+rsi2ob = rsi_tf2 > rsi_high
+rsi2os = rsi_tf2 < rsi_low
+rsi3ob = rsi_tf3 > rsi_high
+rsi3os = rsi_tf3 < rsi_low
+rsi4ob = rsi_tf4 > rsi_high
+rsi4os = rsi_tf4 < rsi_low
+
+tf1mov = get_movement(rsi_tf1)
+tf2mov = get_movement(rsi_tf2)
+tf3mov = get_movement(rsi_tf3)
+tf4mov = get_movement(rsi_tf4)
+
+// Colors
+obColor = color.blue
+osColor = #d43128
+bullColor = #20b8e6
+bearColor = color.red
+
+tf1movColor = tf1mov == 'Bull' ? bullColor : bearColor
+tf2movColor = tf2mov == 'Bull' ? bullColor : bearColor
+tf3movColor = tf3mov == 'Bull' ? bullColor : bearColor
+tf4movColor = tf4mov == 'Bull' ? bullColor : bearColor
+
+tf1RSIColor = rsi1ob ? obColor : rsi1os ? osColor : tf1movColor
+tf2RSIColor = rsi2ob ? obColor : rsi2os ? osColor : tf2movColor
+tf3RSIColor = rsi3ob ? obColor : rsi3os ? osColor : tf3movColor
+tf4RSIColor = rsi4ob ? obColor : rsi4os ? osColor : tf4movColor
+
+tf1status = rsi1ob ? 'Overbought' : rsi1os ? 'Oversold' : 'OK'
+tf2status = rsi2ob ? 'Overbought' : rsi2os ? 'Oversold' : 'OK'
+tf3status = rsi3ob ? 'Overbought' : rsi3os ? 'Oversold' : 'OK'
+tf4status = rsi4ob ? 'Overbought' : rsi4os ? 'Oversold' : 'OK'
+
+// Convergences
+rsi_ob_convergence = (tf1_cvg_opt ? rsi1ob : true) and (tf2_cvg_opt ? rsi2ob : true) and (tf3_cvg_opt ? rsi3ob : true) and (tf4_cvg_opt ? rsi4ob : true)
+rsi_os_convergence = (tf1_cvg_opt ? rsi1os : true) and (tf2_cvg_opt ? rsi2os : true) and (tf3_cvg_opt ? rsi3os : true) and (tf4_cvg_opt ? rsi4os : true)
+
+// Screener
+default_bg = #cccccc
+var tbl = table.new(position.top_right, 4, 6)
+if show_screener
+    if barstate.islast
+        table.cell(tbl, 0, 0, 'TimeFrame', bgcolor=default_bg)
+        table.cell(tbl, 1, 0, 'RSI', bgcolor=default_bg)
+        table.cell(tbl, 2, 0, 'Movement', bgcolor=default_bg)
+        table.cell(tbl, 3, 0, 'RSI Status', bgcolor=default_bg)
+
+        table.cell(tbl, 0, 1, tf1 + (tf1_cvg_opt ? '*' : ''), bgcolor=default_bg)
+        table.cell(tbl, 1, 1, str.tostring(rsi_tf1, '#.##'), bgcolor=tf1RSIColor)
+        table.cell(tbl, 2, 1, tf1mov, bgcolor=tf1RSIColor)
+        table.cell(tbl, 3, 1, tf1status, bgcolor=tf1RSIColor)
+
+        table.cell(tbl, 0, 2, tf2 + (tf2_cvg_opt ? '*' : ''), bgcolor=default_bg)
+        table.cell(tbl, 1, 2, str.tostring(rsi_tf2, '#.##'), bgcolor=tf2RSIColor)
+        table.cell(tbl, 2, 2, tf2mov, bgcolor=tf2RSIColor)
+        table.cell(tbl, 3, 2, tf2status, bgcolor=tf2RSIColor)
+
+        table.cell(tbl, 0, 3, tf3 + (tf3_cvg_opt ? '*' : ''), bgcolor=default_bg)
+        table.cell(tbl, 1, 3, str.tostring(rsi_tf3, '#.##'), bgcolor=tf3RSIColor)
+        table.cell(tbl, 2, 3, tf3mov, bgcolor=tf3RSIColor)
+        table.cell(tbl, 3, 3, tf3status, bgcolor=tf3RSIColor)
+
+        table.cell(tbl, 0, 4, tf4 + (tf4_cvg_opt ? '*' : ''), bgcolor=default_bg)
+        table.cell(tbl, 1, 4, str.tostring(rsi_tf4, '#.##'), bgcolor=tf4RSIColor)
+        table.cell(tbl, 2, 4, tf4mov, bgcolor=tf4RSIColor)
+        table.cell(tbl, 3, 4, tf4status, bgcolor=tf4RSIColor)
+
+        // Warning convergence alerts
+        rsi_warning_message = rsi_os_convergence ? 'RSI OS convergence' : rsi_ob_convergence ? 'RSI OB convergence' : 'No RSI warning'
+        rsi_warning_color = rsi_os_convergence ? osColor : rsi_ob_convergence ? obColor : default_bg
+
+        table.cell(tbl, 0, 5, 'Warnings', bgcolor=color.orange)
+        table.cell(tbl, 1, 5, rsi_warning_message, bgcolor=rsi_warning_color)
+
+// Oscillators
+// Zones & lines
+ob_zone_color = obColor
+os_zone_color = osColor
+invisible = #00000000
+
+h0 = hline(show_drawings(rsi_high), 'Upper Band', color=ob_zone_color)
+hmid = hline(show_drawings(50), 'Middle Band', color=#ffffff45)
+h1 = hline(show_drawings(rsi_low), 'Lower Band', color=os_zone_color)
+obZone = hline(show_drawings(rsi_high), color=invisible)
+osZone = hline(show_drawings(rsi_low), color=invisible)
+
+plot(show_drawings(rsi_tf1), 'RSI #1', color=tf1RSIColor, linewidth=1, transp=20)
+plot(show_drawings(rsi_tf2), 'RSI #2', color=tf2RSIColor, linewidth=2, transp=40)
+plot(show_drawings(rsi_tf3), 'RSI #3', color=tf3RSIColor, linewidth=3, transp=60)
+plot(show_drawings(rsi_tf4), 'RSI #4', color=tf4RSIColor, linewidth=4, transp=80)
+
+// Shapes
+plotshape(show_drawings(rsi_os_convergence) ? 1 : 0, color=color.new(bullColor, 0), location=location.bottom, size=size.tiny, style=shape.triangleup, title='Bullish movement')
+plotshape(show_drawings(rsi_ob_convergence) ? 1 : 0, color=color.new(bearColor, 0), location=location.top, size=size.tiny, style=shape.triangledown, title='Bearish movement')
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (rsi screener)                                               ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║                That's all Folks !                                            ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
