@@ -173,18 +173,18 @@ if venbl
     float vp_Vmax = 0.0
     int vp_VmaxId = 0
     int vp_N_BARS = vp_max_bars
-    
+
     var int vp_first = time
-    
+
     vp_a_P = array.new_float(vp_N_BARS + 1, 0.0)  // LL -> HH
     vp_a_V = array.new_float(vp_N_BARS + 1, 0.0)
     vp_a_W = array.new_int(vp_N_BARS, 0)
-    
-    
+
+
     // CALCULATIONS
     float vp_HH = ta.highest(high, vp_lookback)
     float vp_LL = ta.lowest(low, vp_lookback)
-    
+
     if barstate.islast
         float vp_HL = (vp_HH - vp_LL) / vp_N_BARS
         for j = 1 to vp_N_BARS + 1 by 1
@@ -206,21 +206,21 @@ if venbl
                         float Vj = array.get(vp_a_V, j)
                         float dVj = Vj + (Dc > 0 ? nz(volume[i]) / Dc : 0.0)
                         array.set(vp_a_V, j, dVj)
-    
+
         vp_Vmax := array.max(vp_a_V)
         vp_VmaxId := array.indexof(vp_a_V, vp_Vmax)
-    
+
         for j = 0 to vp_N_BARS - 1 by 1
             float Vj = array.get(vp_a_V, j)
             int Aj = math.round(vp_bar_mult * Vj / vp_Vmax)
             array.set(vp_a_W, j, Aj)
-    
+
     if barstate.isfirst
         vp_first := time
         vp_first
     vp_change = ta.change(time)
     vp_x_loc = timenow + math.round(vp_change * vp_bar_offset)
-    
+
     if barstate.islast
         for i = 0 to vp_N_BARS - 1 by 1
             x1 = vp_VmaxId == i and vp_poc_show ? math.max(time[vp_lookback], vp_first) : timenow + math.round(vp_change * (vp_bar_offset - array.get(vp_a_W, i)))
@@ -233,4 +233,3 @@ lower = alert == 1 ? lower1 : alert == 2 ? lower2 : lower3
 upper_x = sel_x == 'Outside' ? ta.crossover(src, upper) : ta.crossunder(src, upper)
 lower_x = sel_x == 'Outside' ? ta.crossunder(src, lower) : ta.crossover(src, lower)
 alertcondition(upper_x or lower_x, title='Alert BB Cross', message='Alert BB Cross')
-

@@ -2,8 +2,6 @@
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║ © www.huseyingulen.net                                                       ║
-// ║                                                                              ║
 // ║ SR Channel                                                                   ║
 // ║ Any 8 Moving Averages                                                        ║
 // ║                                                                              ║
@@ -53,7 +51,7 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator(title='SR Channel - XMA Cloud', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
+indicator(title='hypeupgrade Turkiye 4', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗

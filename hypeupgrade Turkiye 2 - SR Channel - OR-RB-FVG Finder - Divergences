@@ -2,8 +2,6 @@
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║ © www.huseyingulen.net                                                       ║
-// ║                                                                              ║
 // ║ SR Channel                                                                   ║
 // ║ OR/RB/FVG Finder                                                             ║
 // ║ Divergences                                                                  ║
@@ -54,7 +52,7 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator(title='SR Channel - OB/RB/FVG Finder - Divergences', overlay=true, max_lines_count=500, max_labels_count=500, max_bars_back=2000)
+indicator(title='hypeupgrade Turkiye 2', overlay=true, max_lines_count=500, max_labels_count=500, max_bars_back=2000)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
