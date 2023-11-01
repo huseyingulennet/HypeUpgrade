@@ -7,8 +7,8 @@
 // ║ Key Levels                                                                   ║
 // ║ Imbalance                                                                    ║
 // ║                                                                              ║
-// ║ developer : hypeupgradeTR                                                    ║
-// ║ creators  : mrsebqstianc, spaceman, glaz, travelling_trader,                 ║
+// ║ developer : HYPEUPGRADETR                                                    ║
+// ║ creators  : HYPEUPGRADETR , mrsebqstianc, spaceman, glaz, travelling_trader  ║
 // ║                                                                              ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
@@ -54,7 +54,7 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator(title='hypeupgrade Turkiye 1', overlay=true, max_lines_count=500, max_boxes_count=500)
+indicator(title='HYPEUPGRADETR 1', overlay=true, max_lines_count=500, max_boxes_count=500)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗

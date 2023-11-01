@@ -7,8 +7,8 @@
 // ║ Supertrend                                                                   ║
 // ║ Kaufmann                                                                     ║
 // ║                                                                              ║
-// ║ developer : hypeupgradeTR                                                    ║
-// ║ creators  : LonesomeTheblue, Spaceman, everget, Hpotter                      ║
+// ║ developer : HYPEUPGRADETR                                                    ║
+// ║ creators  : HYPEUPGRADETR, LonesomeTheblue, Spaceman, everget, Hpotter       ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
 // ║ at https://mozilla.org/MPL/2.0/                                              ║
@@ -53,7 +53,7 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator(title='hypeupgrade Turkiye 3', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
+indicator(title='HYPEUPGRADETR 3', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗

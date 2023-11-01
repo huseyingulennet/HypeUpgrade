@@ -8,8 +8,8 @@
 // ║ RSI Candles                                                                  ║
 // ║ Dynamic Imbalance                                                            ║
 // ║                                                                              ║
-// ║ developer : hypeupgradeTR                                                    ║
-// ║ creators  : hypeupgradeTR, By Leviathan, SpacemanBTC, crypto_kai, glaz       ║
+// ║ developer : HYPEUPGRADETR                                                    ║
+// ║ creators  : HYPEUPGRADETR, By Leviathan, SpacemanBTC, crypto_kai, glaz       ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
 // ║ at https://mozilla.org/MPL/2.0/                                              ║
@@ -54,7 +54,7 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator('hypeupgrade Turkiye 5', overlay=true, max_boxes_count=500, max_bars_back=1000, max_lines_count=500)
+indicator('HYPEUPGRADETR 5', overlay=true, max_boxes_count=500, max_bars_back=1000, max_lines_count=500)
 //indicator("Market sessions and Volume profile - By Leviathan", overlay=true, max_boxes_count=500, max_bars_back=1000)
 //indicator(title='RSI Chart Bars', overlay=true, shorttitle='RSI Bars')
 //indicator('Imbalance Finder Dynamic', overlay=true, max_lines_count=500, max_boxes_count=500)
