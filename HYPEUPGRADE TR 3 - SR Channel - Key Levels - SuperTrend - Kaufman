@@ -1,15 +1,15 @@
+//©HYPEUPGRADETR (based multible sources, modified and optimised by HYPEUPGRADETR)
 //@version=5
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║ DayofWeek                                                                    ║
-// ║ Market sessions                                                              ║
+// ║ SR Channel                                                                   ║
 // ║ Key Levels                                                                   ║
-// ║ RSI Candles                                                                  ║
-// ║ Dynamic Imbalance                                                            ║
+// ║ Supertrend                                                                   ║
+// ║ Kaufmann                                                                     ║
 // ║                                                                              ║
 // ║ developer : HYPEUPGRADETR                                                    ║
-// ║ creators  : HYPEUPGRADETR, By Leviathan, SpacemanBTC, crypto_kai, glaz       ║
+// ║ creators  : HYPEUPGRADETR, LonesomeTheblue, Spaceman, everget, Hpotter       ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
 // ║ at https://mozilla.org/MPL/2.0/                                              ║
@@ -54,619 +54,307 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator('HYPEUPGRADETR 5', overlay=true, max_boxes_count=500, max_bars_back=1000, max_lines_count=500)
-//indicator("Market sessions and Volume profile - By Leviathan", overlay=true, max_boxes_count=500, max_bars_back=1000)
-//indicator(title='RSI Chart Bars', overlay=true, shorttitle='RSI Bars')
-//indicator('Imbalance Finder Dynamic', overlay=true, max_lines_count=500, max_boxes_count=500)
-//indicator('Key Levels SpacemanBTC IDWM', shorttitle='SpacemanBTC Key Level V13.1', overlay=true, max_lines_count=100)
+indicator(title='HYPEUPGRADETR 3', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (market day)                                                  ║
+// ║     main start (supertrend)                                                  ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-show_monday = input.bool(false, "Monday-Pazartesi", group="/// MARKET GÜNLERİ ///")
-show_tuesday = input.bool(false, "Tuesday-Salı", group="/// MARKET GÜNLERİ ///")
-show_wednesday = input.bool(false, "Wednesday-Çarşamba", group="/// MARKET GÜNLERİ ///")
-show_thursday = input.bool(false, "Thursday-Perşembe", group="/// MARKET GÜNLERİ ///")
-show_friday = input.bool(false, "Friday-Cuma", group="/// MARKET GÜNLERİ ///")
-show_saturday = input.bool(true, "Saturday-Cumartesi", group="/// MARKET GÜNLERİ ///")
-show_sunday = input.bool(true, "Sunday-Pazar", group="/// MARKET GÜNLERİ ///")
-transp = input.int(85, "Transp", minval=0, maxval=100, group="/// MARKET GÜNLERİ ///")
 
-c_monday = color.new(color.red, transp)
-c_tuesday = color.new(color.orange, transp)
-c_wednesday = color.new(color.yellow, transp)
-c_thursday = color.new(color.green, transp)
-c_friday = color.new(color.aqua, transp)
-c_saturday = color.new(color.blue, transp)
-c_sunday = color.new(color.purple, transp)
+length = input(title='ATR Period', defval=22)
+mult = input.float(title='ATR Multiplier', step=0.1, defval=3)
+src = input(title='Source', defval=hl2)
+wicks = input(title='Take Wicks into Account ?', defval=false)
+showLabels = input(title='Show Buy/Sell Labels ?', defval=true)
+highlightState = input(title='Highlight State ?', defval=true)
 
-day = dayofweek
-monday = dayofweek.monday
-tuesday = dayofweek.tuesday
-wednesday = dayofweek.wednesday
-thursday = dayofweek.thursday
-friday = dayofweek.friday
-saturday = dayofweek.saturday
-sunday = dayofweek.sunday
-bgcolor(show_monday and day == monday ? c_monday : na, title="Monday-Pazartesi")
-bgcolor(show_tuesday and day == tuesday ? c_tuesday : na, title="Tuesday-Salı")
-bgcolor(show_wednesday and day == wednesday ? c_wednesday : na, title="Wednesday-Çarşamba")
-bgcolor(show_thursday and day == thursday ? c_thursday : na, title="Thursday-Perşembe")
-bgcolor(show_friday and day == friday ? c_friday : na, title="Friday-Cuma")
-bgcolor(show_saturday and day == saturday ? c_saturday : na, title="Saturday-Cumartesi")
-bgcolor(show_sunday and day == sunday ? c_sunday : na, title="Sunday-Pazar")
+atr = mult * ta.atr(length)
+
+highPrice = wicks ? high : close
+lowPrice = wicks ? low : close
+doji4price = open == close and open == low and open == high
+
+longStop = src - atr
+longStopPrev = nz(longStop[1], longStop)
+
+if longStop > 0
+    if doji4price
+        longStop := longStopPrev
+        longStop
+    else
+        longStop := lowPrice[1] > longStopPrev ? math.max(longStop, longStopPrev) : longStop
+        longStop
+else
+    longStop := longStopPrev
+    longStop
+
+shortStop = src + atr
+shortStopPrev = nz(shortStop[1], shortStop)
+
+if shortStop > 0
+    if doji4price
+        shortStop := shortStopPrev
+        shortStop
+    else
+        shortStop := highPrice[1] < shortStopPrev ? math.min(shortStop, shortStopPrev) : shortStop
+        shortStop
+else
+    shortStop := shortStopPrev
+    shortStop
+
+var int dir = 1
+dir := dir == -1 and highPrice > shortStopPrev ? 1 : dir == 1 and lowPrice < longStopPrev ? -1 : dir
+
+var color longColor = color.green
+var color shortColor = color.red
+
+longStopPlot = plot(dir == 1 ? longStop : na, title='Long Stop', style=plot.style_linebr, linewidth=2, color=color.new(longColor, 0))
+buySignal = dir == 1 and dir[1] == -1
+plotshape(buySignal ? longStop : na, title='Long Stop Start', location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(longColor, 0))
+plotshape(buySignal and showLabels ? longStop : na, title='Buy Label', text='Buy Trend', location=location.absolute, style=shape.labelup, size=size.tiny, color=color.new(longColor, 0), textcolor=color.new(color.white, 0))
+
+shortStopPlot = plot(dir == 1 ? na : shortStop, title='Short Stop', style=plot.style_linebr, linewidth=2, color=color.new(shortColor, 0))
+sellSignal = dir == -1 and dir[1] == 1
+plotshape(sellSignal ? shortStop : na, title='Short Stop Start', location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(shortColor, 0))
+plotshape(sellSignal and showLabels ? shortStop : na, title='Sell Label', text='Sell Trend', location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.new(shortColor, 0), textcolor=color.new(color.white, 0))
+
+midPricePlot = plot(ohlc4, title='', style=plot.style_circles, linewidth=0, display=display.none, editable=false)
+
+longFillColor = highlightState ? dir == 1 ? longColor : na : na
+shortFillColor = highlightState ? dir == -1 ? shortColor : na : na
+fill(midPricePlot, longStopPlot, title='Long State Filling', color=longFillColor, transp=90)
+fill(midPricePlot, shortStopPlot, title='Short State Filling', color=shortFillColor, transp=90)
+
+changeCond = dir != dir[1]
+alertcondition(changeCond, title='Alert: SuperTrend Direction Change', message='SuperTrend has changed direction!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
+alertcondition(buySignal, title='Alert: SuperTrend Buy', message='SuperTrend Buy!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
+alertcondition(sellSignal, title='Alert: SuperTrend Sell', message='SuperTrend Sell!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main finish (market day)                                                 ║
+// ║     main finish (supertrend)                                                 ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
+
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (market sessions)                                             ║
+// ║     main start (kaufman)                                                     ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-//==========================
-//Inputs
-//==========================
-sessionType = input.string('Daily', 'Session Type', options=['Tokyo','London','New York','Daily','Weekly', 'Monthly', 'Quarterly', 'Yearly'], group="/// MARKET SEANSLARI ///")
+Length = input.int(21, minval=1)
+xPrice = close
+xvnoise = math.abs(xPrice - xPrice[1])
+nAMA = 0.0
+nfastend = 0.666
+nslowend = 0.0645
+nsignal = math.abs(xPrice - xPrice[Length])
+nnoise = math.sum(xvnoise, Length)
+nefratio = nnoise != 0 ? nsignal / nnoise : 0
+nsmooth = math.pow(nefratio * (nfastend - nslowend) + nslowend, 2)
+nAMA := nz(nAMA[1]) + nsmooth * (xPrice - nz(nAMA[1]))
+plot(nAMA, color=color.new(color.blue, 0), title='KAMA')
 
-showProf = input.bool(false, 'Show Volume Profile', group='/// MARKET SEANSLARI ///')
-showSbox = input.bool(false, 'Show Session Box', group='/// MARKET SEANSLARI ///')
-showPoc = input.bool(true, 'Show POC', group='/// MARKET SEANSLARI ///')
-showVA = input.bool(true, 'Show VAH and VAL', group='/// MARKET SEANSLARI ///')
-showVAb = input.bool(false, 'Show Value Area Box', group='/// MARKET SEANSLARI ///')
-showCur = input.bool(false, 'Show Live Zone', group='/// MARKET SEANSLARI ///')
-showLabels = input.bool(true, 'Show Session Lables', group='/// MARKET SEANSLARI ///')
-showFx = input.bool(false, 'Show Forex Sessions (no profile)', group='/// MARKET SEANSLARI ///')
-resolution = input.int(30, 'Resolution', minval=5, tooltip='The higher the value, the more refined of a profile, but less profiles shown on chart', group='Volume Profile Settings')
-VAwid = input.int(70, 'Value Area Volume %', minval=1, maxval=100, group='Volume Profile Settings')
-dispMode = input.string('Mode 2', 'Bar Mode', ['Mode 1', 'Mode 2', 'Mode 3'], group='Volume Profile Settings')
-volType = input.string('Volume', 'Profile Data Type', options=['Volume', 'Open Interest'], group='Volume Profile Settings')
-smoothVol = input.bool(false, 'Smooth Volume Data', tooltip='Useful for assets that have very large spikes in volume over large bars - helps create better profiles', group='Volume Profile Settings')
-dataTf = ''
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (kaufman)                                                    ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
-bullCol = input.color(color.rgb(76, 175, 79, 50), 'Up Volume', group='Appearance')
-bearCol = input.color(color.rgb(255, 82, 82, 50), 'Down Volume', group='Appearance')
-VAbCol = input.color(color.rgb(107, 159, 255, 90), 'Value Area Box', group='Appearance' )
-pocCol = input.color(color.red, 'POC', inline='p', group='Appearance')
-pocWid = input.int(2, 'Thickness', inline='p', group='Appearance')
-vahCol = input.color(color.aqua, 'VAH', inline='h', group='Appearance')
-vahWid = input.int(1, 'Thickness', inline='h', group='Appearance')
-valCol = input.color(color.aqua, 'VAL', inline='l', group='Appearance')
-valWid = input.int(1, 'Thickness', inline='l', group='Appearance')
-boxBg = input.color(color.rgb(255, 153, 0, 100), 'Box', inline='m', group='Appearance')
-boxWid = input.int(1, 'Thickness', inline='m', group='Appearance')
 
-//==========================
-//Constants / Variable Declaration
-//==========================
-var int zoneStart = 0
-var int tokyoStart = 0
-var int londonStart = 0
-var int nyStart = 0
-int lookback = bar_index - zoneStart
-var activeZone = false
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (support resistance)                                          ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
-// Defining arrays that store the information
-var vpGreen = array.new_float(resolution, 0) // Sum of volume on long bars
-var vpRed = array.new_float(resolution, 0) // Same thing but with red bars
-var zoneBounds = array.new_float(resolution, 0) // array that stores the highest value that can be in a zone
+prd = input.int(defval=10, title='Pivot Period', minval=4, maxval=30, group='=== S/R CHANNEL SETTINGS ===', tooltip='Used while calculating Pivot Points, checks left&right bars')
+ppsrc = input.string(defval='High/Low', title='Source', options=['High/Low', 'Close/Open'], group='=== S/R CHANNEL SETTINGS ===', tooltip='Source for Pivot Points')
+ChannelW = input.int(defval=5, title='Maximum Channel Width %', minval=1, maxval=8, group='=== S/R CHANNEL SETTINGS ===', tooltip='Calculated using Highest/Lowest levels in 300 bars')
+minstrength = input.int(defval=1, title='Minimum Strength', minval=1, group='=== S/R CHANNEL SETTINGS ===', tooltip='Channel must contain at least 2 Pivot Points')
+maxnumsr = input.int(defval=6, title='Maximum Number of S/R', minval=1, maxval=10, group='=== S/R CHANNEL SETTINGS ===', tooltip='Maximum number of Support/Resistance Channels to Show') - 1
+loopback = input.int(defval=400, title='Loopback Period', minval=100, maxval=400, group='=== S/R CHANNEL SETTINGS ===', tooltip='While calculating S/R levels it checks Pivots in Loopback Period')
+res_col = input.color(defval=color.new(color=#f7525f, transp=65), title='Resistance Color', group='=== S/R COLOR SETTINGS ===')
+sup_col = input.color(defval=color.new(color=#00e676, transp=65), title='Support Color', group='=== S/R COLOR SETTINGS ===')
+inch_col = input.color(defval=color.new(color=#ffeb3b, transp=50), title='Color When Price in Channel', group='=== S/R COLOR SETTINGS ===')
+showpp = input.bool(defval=false, title='Show Pivot Points', group='=== S/R EXTRA SETTINGS ===')
+showsrbroken = input.bool(defval=false, title='Show Broken Support/Resistance', group='=== S/R EXTRA SETTINGS ===')
 
-//Values to store current intra bar data
-var float[] ltfOpen =  array.new_float(0)
-var float[] ltfClose =  array.new_float(0)
-var float[] ltfHigh =  array.new_float(0)
-var float[] ltfLow =  array.new_float(0)
-var float[] ltfVolume = array.new_float(0)
 
-//Getting OI Data
-string userSymbol = syminfo.prefix + ":" + syminfo.ticker
-string openInterestTicker = str.format("{0}_OI", userSymbol)
-string timeframe = syminfo.type == "futures" and timeframe.isintraday ? "1D" : timeframe.period
-deltaOi = request.security(openInterestTicker, timeframe, close-close[1], ignore_invalid_symbol = true)
+// get Pivot High/low
+float src1 = ppsrc == 'High/Low' ? high : math.max(close, open)
+float src2 = ppsrc == 'High/Low' ? low : math.min(close, open)
+float ph = ta.pivothigh(src1, prd, prd)
+float pl = ta.pivotlow(src2, prd, prd)
 
-//Selecting what vol type to use
-vol() =>
-    out = smoothVol ? ta.ema(volume, 5) : volume
-    if volType == 'Open Interest'
-        out := deltaOi
-    out
+// draw Pivot points
+plotshape(ph and showpp, text='H', style=shape.labeldown, color=na, textcolor=color.new(color.red, 0), location=location.abovebar, offset=-prd)
+plotshape(pl and showpp, text='L', style=shape.labelup, color=na, textcolor=color.new(color.lime, 0), location=location.belowbar, offset=-prd)
 
-//Getting intrabar intial data
-[dO, dC, dH, dL, dV] = request.security_lower_tf(syminfo.tickerid, dataTf, [open, close, high, low, vol()])
+//calculate maximum S/R channel width
+prdhighest = ta.highest(300)
+prdlowest = ta.lowest(300)
+cwidth = (prdhighest - prdlowest) * ChannelW / 100
 
-//==========================
-//Functions
-//==========================
-resetProfile(enable) =>
-    if enable
-        array.fill(vpGreen, 0)
-        array.fill(vpRed, 0)
-        array.clear(ltfOpen)
-        array.clear(ltfHigh)
-        array.clear(ltfLow)
-        array.clear(ltfClose)
-        array.clear(ltfVolume)
+// get/keep Pivot levels
+var pivotvals = array.new_float(0)
+var pivotlocs = array.new_float(0)
+if ph or pl
+    array.unshift(pivotvals, ph ? ph : pl)
+    array.unshift(pivotlocs, bar_index)
+    for x = array.size(pivotvals) - 1 to 0 by 1
+        if bar_index - array.get(pivotlocs, x) > loopback  // remove old pivot points
+            array.pop(pivotvals)
+            array.pop(pivotlocs)
+            continue
+        break
 
-profHigh = ta.highest(high, lookback+1)[1]
-profLow = ta.lowest(low, lookback+1)[1]
-
-tr = ta.atr(1)
-atr = ta.atr(14)
-
-get_vol(y11, y12, y21, y22, height, vol) =>
-    nz(math.max(math.min(math.max(y11, y12), math.max(y21, y22)) - math.max(math.min(y11, y12), math.min(y21, y22)), 0) * vol / height)
-
-profileAdd(o, h, l, c, v, g, w) =>
-    //Array to store how much to distribute in each zone, on scale of 1 for full gap size to 0
-    zoneDist = array.new_float(resolution, 0)
-    distSum = 0.0
-    // Going over each zone
-    for i = 0 to array.size(vpGreen) - 1
-        // Checking to see if cur bar is in zone
-        zoneTop = array.get(zoneBounds, i)
-        zoneBot = zoneTop - g
-
-        body_top = math.max(c, o)
-        body_bot = math.min(c, o)
-        itsgreen = c >= o
-
-        topwick = h - body_top
-        bottomwick = body_bot - l
-        body = body_top - body_bot
-
-        bodyvol = body * v / (2 * topwick + 2 * bottomwick + body)
-        topwickvol = 2 * topwick * v / (2 * topwick + 2 * bottomwick + body)
-        bottomwickvol = 2 * bottomwick * v / (2 * topwick + 2 * bottomwick + body)
-
-        if volType == 'Volume'
-            array.set(vpGreen, i, array.get(vpGreen, i) + (itsgreen ? get_vol(zoneBot, zoneTop, body_bot, body_top, body, bodyvol) : 0) + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-            array.set(vpRed, i, array.get(vpRed, i) + (itsgreen ? 0 : get_vol(zoneBot, zoneTop, body_bot, body_top, body, bodyvol)) + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-        else if volType == 'Open Interest'
-            if v > 0
-                array.set(vpGreen, i, array.get(vpGreen, i) + get_vol(zoneBot, zoneTop, body_bot, body_top, body, v))// + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-            if v < 0
-                array.set(vpRed, i, array.get(vpRed, i) + get_vol(zoneBot, zoneTop, body_bot, body_top, body, -v))// + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-
-calcSession(update) =>
-    array.fill(vpGreen, 0)
-    array.fill(vpRed, 0)
-    if bar_index > lookback and update
-        gap = (profHigh - profLow) / resolution
-
-        // Defining profile bounds
-        for i = 0 to resolution - 1
-            array.set(zoneBounds, i, profHigh - gap * i)
-
-        // Putting each bar inside zone into the volume profile array
-        if array.size(ltfOpen) > 0
-            for j = 0 to array.size(ltfOpen) - 1
-                profileAdd(array.get(ltfOpen, j), array.get(ltfHigh, j), array.get(ltfLow, j), array.get(ltfClose, j), array.get(ltfVolume, j), gap, 1)
-
-pocLevel() =>
-    float maxVol = 0
-    int levelInd = 0
-    for i = 0 to array.size(vpRed) - 1
-        if array.get(vpRed, i) + array.get(vpGreen, i) > maxVol
-            maxVol := array.get(vpRed, i) + array.get(vpGreen, i)
-            levelInd := i
-
-    float outLevel = na
-    if levelInd != array.size(vpRed) - 1
-        outLevel := array.get(zoneBounds, levelInd) - (array.get(zoneBounds, levelInd) - array.get(zoneBounds, levelInd+1)) / 2
-    outLevel
-
-valueLevels(poc) =>
-    float gap = (profHigh - profLow) / resolution
-    float volSum = array.sum(vpRed) + array.sum(vpGreen)
-    float volCnt = 0
-
-    float vah = profHigh
-    float val = profLow
-
-    //Finding poc index
-    int pocInd = 0
-    for i = 0 to array.size(zoneBounds)-2
-        if array.get(zoneBounds, i) >= poc and array.get(zoneBounds, i + 1) < poc
-            pocInd := i
-
-    volCnt += (array.get(vpRed, pocInd) + array.get(vpGreen, pocInd))
-    for i = 1 to array.size(vpRed)
-        if pocInd + i >= 0 and pocInd + i < array.size(vpRed)
-            volCnt += (array.get(vpRed, pocInd + i) + array.get(vpGreen, pocInd + i))
-            if volCnt >= volSum * (VAwid/100)
-                break
+//find/create SR channel of a pivot point
+get_sr_vals(ind) =>
+    float lo = array.get(pivotvals, ind)
+    float hi = lo
+    int numpp = 0
+    for y = 0 to array.size(pivotvals) - 1 by 1
+        float cpp = array.get(pivotvals, y)
+        float wdth = cpp <= hi ? hi - cpp : cpp - lo
+        if wdth <= cwidth  // fits the max channel width?
+            if cpp <= hi
+                lo := math.min(lo, cpp)
+                lo
             else
-                val := array.get(zoneBounds, pocInd + i) - gap
-        if pocInd - i >= 0 and pocInd - i < array.size(vpRed)
-            volCnt += (array.get(vpRed, pocInd - i) + array.get(vpGreen, pocInd - i))
-            if volCnt >= volSum * (VAwid/100)
+                hi := math.max(hi, cpp)
+                hi
+
+            numpp += 20  // each pivot point added as 20
+            numpp
+    [hi, lo, numpp]
+
+// keep old SR channels and calculate/sort new channels if we met new pivot point
+var suportresistance = array.new_float(20, 0)  // min/max levels
+changeit(x, y) =>
+    tmp = array.get(suportresistance, y * 2)
+    array.set(suportresistance, y * 2, array.get(suportresistance, x * 2))
+    array.set(suportresistance, x * 2, tmp)
+    tmp := array.get(suportresistance, y * 2 + 1)
+    array.set(suportresistance, y * 2 + 1, array.get(suportresistance, x * 2 + 1))
+    array.set(suportresistance, x * 2 + 1, tmp)
+
+if ph or pl
+    supres = array.new_float(0)  // number of pivot, strength, min/max levels
+    stren = array.new_float(10, 0)
+    // get levels and strengs
+    for x = 0 to array.size(pivotvals) - 1 by 1
+        [hi, lo, strength] = get_sr_vals(x)
+        array.push(supres, strength)
+        array.push(supres, hi)
+        array.push(supres, lo)
+
+    // add each HL to strengh
+    for x = 0 to array.size(pivotvals) - 1 by 1
+        h = array.get(supres, x * 3 + 1)
+        l = array.get(supres, x * 3 + 2)
+        s = 0
+        for y = 0 to loopback by 1
+            if high[y] <= h and high[y] >= l or low[y] <= h and low[y] >= l
+                s += 1
+                s
+        array.set(supres, x * 3, array.get(supres, x * 3) + s)
+
+    //reset SR levels
+    array.fill(suportresistance, 0)
+    // get strongest SRs
+    src = 0
+    for x = 0 to array.size(pivotvals) - 1 by 1
+        stv = -1.  // value
+        stl = -1  // location
+        for y = 0 to array.size(pivotvals) - 1 by 1
+            if array.get(supres, y * 3) > stv and array.get(supres, y * 3) >= minstrength * 20
+                stv := array.get(supres, y * 3)
+                stl := y
+                stl
+        if stl >= 0
+            //get sr level
+            hh = array.get(supres, stl * 3 + 1)
+            ll = array.get(supres, stl * 3 + 2)
+            array.set(suportresistance, src * 2, hh)
+            array.set(suportresistance, src * 2 + 1, ll)
+            array.set(stren, src, array.get(supres, stl * 3))
+
+            // make included pivot points' strength zero
+            for y = 0 to array.size(pivotvals) - 1 by 1
+                if array.get(supres, y * 3 + 1) <= hh and array.get(supres, y * 3 + 1) >= ll or array.get(supres, y * 3 + 2) <= hh and array.get(supres, y * 3 + 2) >= ll
+                    array.set(supres, y * 3, -1)
+
+            src += 1
+            if src >= 10
                 break
-            else
-                vah := array.get(zoneBounds, pocInd - i)
 
-    [val, vah]
-
-drawNewZone(update) =>
-    if bar_index > lookback and update and array.sum(vpGreen) + array.sum(vpRed) > 0
-        gap = (profHigh - profLow) / resolution
-        float leftMax = bar_index[lookback]
-        float rightMax = bar_index[int(lookback / 1.4)]
-        float rightMaxVol = array.max(vpGreen)+array.max(vpRed)
-        float buffer = gap / 10
-        if showLabels
-            label.new((bar_index - 1 + int(leftMax))/2, profHigh, sessionType, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-        if showProf
-            for i = 0 to array.size(vpRed) - 1
-                greenEnd = int(leftMax + (rightMax - leftMax) * (array.get(vpGreen, i) / rightMaxVol))
-                redEnd = int(greenEnd + (rightMax - leftMax) * (array.get(vpRed, i) / rightMaxVol))
-                if dispMode == 'Mode 2'
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                    box.new(greenEnd, array.get(zoneBounds, i) - buffer, redEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0)
-                else if dispMode == 'Mode 1'
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                else
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                    box.new(int(leftMax)-redEnd+greenEnd, array.get(zoneBounds, i) - buffer, int(leftMax), array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0)
-
-        box.new(int(leftMax), profHigh, bar_index-1, profLow, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-        poc = pocLevel()
-        [val, vah] = valueLevels(poc)
-        if showPoc
-            line.new(int(leftMax), poc, bar_index-1, poc, color=pocCol, width=pocWid)
-        if showVA
-            line.new(int(leftMax), vah, bar_index-1, vah, color=vahCol, width=vahWid)
-            line.new(int(leftMax), val, bar_index-1, val, color=valCol, width=valWid)
-        if showVAb
-            box.new(int(leftMax), vah, bar_index-1, val, border_color=color.rgb(54, 58, 69, 100), bgcolor=VAbCol)
+    for x = 0 to 8 by 1
+        for y = x + 1 to 9 by 1
+            if array.get(stren, y) > array.get(stren, x)
+                tmp = array.get(stren, y)
+                array.set(stren, y, array.get(stren, x))
+                changeit(x, y)
 
 
-    //if update
-    //    resetProfile(true)
+get_level(ind) =>
+    float ret = na
+    if ind < array.size(suportresistance)
+        if array.get(suportresistance, ind) != 0
+            ret := array.get(suportresistance, ind)
+            ret
+    ret
 
-drawCurZone(update, delete) =>
-    var line pocLine = na
-    var line vahLine = na
-    var line valLine = na
-    var box outBox = na
-    var label sessionLab = na
+get_color(ind) =>
+    color ret = na
+    if ind < array.size(suportresistance)
+        if array.get(suportresistance, ind) != 0
+            ret := array.get(suportresistance, ind) > close and array.get(suportresistance, ind + 1) > close ? res_col : array.get(suportresistance, ind) < close and array.get(suportresistance, ind + 1) < close ? sup_col : inch_col
+            ret
+    ret
 
-    var redBoxes = array.new_box(array.size(vpRed), na)
-    var greenBoxes = array.new_box(array.size(vpRed), na)
+var srchannels = array.new_box(10)
+for x = 0 to math.min(9, maxnumsr) by 1
+    box.delete(array.get(srchannels, x))
+    srcol = get_color(x * 2)
+    if not na(srcol)
+        array.set(srchannels, x, box.new(left=bar_index, top=get_level(x * 2), right=bar_index + 1, bottom=get_level(x * 2 + 1), border_color=srcol, border_width=0, extend=extend.left, bgcolor=srcol))
 
-    if bar_index > lookback and update and array.sum(vpGreen) + array.sum(vpRed) > 0
-        //Clearing the previous boxes and array
-        if not na(pocLine)
-            line.delete(pocLine)
-        if not na(vahLine)
-            line.delete(vahLine)
-        if not na(valLine)
-            line.delete(valLine)
-        if not na(outBox)
-            box.delete(outBox)
-        if not na(sessionLab)
-            label.delete(sessionLab)
+resistancebroken = false
+supportbroken = false
 
-        for i = 0 to array.size(redBoxes) - 1
-            if not na(array.get(redBoxes, i))
-                box.delete(array.get(redBoxes, i))
-                box.delete(array.get(greenBoxes, i))
+// check if it's not in a channel
+not_in_a_channel = true
+for x = 0 to math.min(9, maxnumsr) by 1
+    if close <= array.get(suportresistance, x * 2) and close >= array.get(suportresistance, x * 2 + 1)
+        not_in_a_channel := false
+        not_in_a_channel
 
+// if price is not in a channel then check broken ones
+if not_in_a_channel
+    for x = 0 to math.min(9, maxnumsr) by 1
+        if close[1] <= array.get(suportresistance, x * 2) and close > array.get(suportresistance, x * 2)
+            resistancebroken := true
+            resistancebroken
+        if close[1] >= array.get(suportresistance, x * 2 + 1) and close < array.get(suportresistance, x * 2 + 1)
+            supportbroken := true
+            supportbroken
 
-        gap = (profHigh - profLow) / resolution
-        float leftMax = bar_index[lookback]
-        float rightMax = bar_index[int(lookback / 1.4)]
-        float rightMaxVol = array.max(vpGreen)+array.max(vpRed)
-        float buffer = gap / 10
-        if showLabels
-            sessionLab := label.new((bar_index - 1 + int(leftMax))/2, profHigh, sessionType, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-        if showProf
-            for i = 0 to array.size(vpRed) - 1
-                greenEnd = int(leftMax + (rightMax - leftMax) * (array.get(vpGreen, i) / rightMaxVol))
-                redEnd = int(greenEnd + (rightMax - leftMax) * (array.get(vpRed, i) / rightMaxVol))
-                if dispMode == 'Mode 2'
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                    array.set(redBoxes, i, box.new(greenEnd, array.get(zoneBounds, i) - buffer, redEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0))
-                else if dispMode == 'Mode 1'
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                else
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                    array.set(redBoxes, i, box.new(int(leftMax)-redEnd+greenEnd, array.get(zoneBounds, i) - buffer, int(leftMax), array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0))
-
-        outBox := box.new(int(leftMax), profHigh, bar_index-1, profLow, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-
-
-        poc = pocLevel()
-        [val, vah] = valueLevels(poc)
-        if showPoc
-            line.delete(pocLine)
-            pocLine := line.new(int(leftMax), poc, bar_index-1, poc, color=pocCol, width=pocWid)
-        if showVA
-            line.delete(vahLine)
-            line.delete(valLine)
-            vahLine := line.new(int(leftMax), vah, bar_index-1, vah, color=vahCol, width=vahWid)
-            valLine := line.new(int(leftMax), val, bar_index-1, val, color=valCol, width=valWid)
-        if showVAb
-            box.new(int(leftMax), vah, bar_index-1, val, border_color=color.rgb(54, 58, 69, 100), bgcolor=VAbCol)
-
-    if delete
-        box.delete(outBox)
-        line.delete(pocLine)
-        line.delete(vahLine)
-        line.delete(valLine)
-        for i = 0 to array.size(greenBoxes)-1
-            box.delete(array.get(greenBoxes, i))
-        for i = 0 to array.size(redBoxes)-1
-            box.delete(array.get(redBoxes, i))
-
-drawForexBox(startBar, title, top, bottom) =>
-    box.new(int(startBar), top, bar_index-1, bottom, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-    if showLabels
-        label.new((bar_index - 1 + int(startBar))/2, top, title, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-
-
-combArray(arr1, arr2) =>
-    out = array.copy(arr1)
-    if array.size(arr2) > 0
-        for i = 0 to array.size(arr2) - 1
-            array.push(out, array.get(arr2, i))
-    out
-
-updateIntra(o, h, l, c, v) =>
-    if array.size(o) > 0
-        for i = 0 to array.size(o) - 1
-            array.push(ltfOpen, array.get(o, i))
-            array.push(ltfHigh,array.get(h, i))
-            array.push(ltfLow,array.get(l, i))
-            array.push(ltfClose,array.get(c, i))
-            array.push(ltfVolume,array.get(v, i))
-
-
-//==========================
-//Calculations
-//==========================
-//Detecting different start dates
-newDaily = dayofweek != dayofweek[1]
-newWeekly = weekofyear != weekofyear[1]
-newMonthly = (dayofmonth != dayofmonth[1] + 1) and (dayofmonth != dayofmonth[1])
-newYearly = year != year[1]
-newQuarterly = month != month[1] and (month - 1) % 3 == 0
-
-utcHour = hour(time(timeframe.period, '0000-2400', 'GMT'), 'GMT')
-
-newTokyo = utcHour != utcHour[1] + 1 and utcHour != utcHour[1]
-endTokyo = utcHour >= 9 and utcHour[1] < 9
-
-newLondon = utcHour >= 7 and utcHour[1] < 7
-endLondon = utcHour >= 16 and utcHour[1] < 16
-
-newNewYork = utcHour >= 13 and utcHour[1] < 13
-endNewYork = utcHour >= 22 and utcHour[1] < 22
-
-newSession = switch sessionType
-    'Tokyo' => newTokyo
-    'London' => newLondon
-    'New York' => newNewYork
-    'Daily' => newDaily
-    'Weekly' => newWeekly
-    'Monthly' => newMonthly
-    'Yearly' => newYearly
-    'Quarterly' => newQuarterly
-    => newDaily
-
-zoneEnd = switch sessionType
-    'Tokyo' => endTokyo
-    'London' => endLondon
-    'New York' => endNewYork
-    'Daily' => newDaily
-    'Weekly' => newWeekly
-    'Monthly' => newMonthly
-    'Yearly' => newYearly
-    'Quarterly' => newQuarterly
-    => newDaily
-
-isForex = showFx
-
-//Re calculating and drawing zones
-calcSession(zoneEnd or (barstate.islast and showCur))
-drawNewZone(zoneEnd)
-drawCurZone(barstate.islast and not zoneEnd and showCur and activeZone, zoneEnd)
-
-//Reseting profie at start of new zone
-resetProfile(newSession)
-
-//Updating data arrays
-updateIntra(dO, dH, dL, dC, dV)
-
-//Reseting zone start value
-if zoneEnd
-    activeZone := false
-
-if newSession
-    zoneStart := bar_index
-    activeZone := true
-
-if newLondon
-    londonStart := bar_index
-if newTokyo
-    tokyoStart := bar_index
-if newNewYork
-    nyStart := bar_index
-
-londonHigh = ta.highest(high, bar_index-londonStart+1)
-tokyoHigh = ta.highest(high, bar_index-tokyoStart+1)
-nyHigh = ta.highest(high, bar_index-nyStart+1)
-
-londonLow = ta.lowest(low, bar_index-londonStart+1)
-tokyoLow = ta.lowest(low, bar_index-tokyoStart+1)
-nyLow = ta.lowest(low, bar_index-nyStart+1)
-
-if endLondon and isForex
-    drawForexBox(londonStart, 'London', londonHigh, londonLow)
-if endNewYork and isForex
-    drawForexBox(nyStart, 'New York', nyHigh, nyLow)
-if endTokyo and isForex
-    drawForexBox(tokyoStart, 'Tokyo', tokyoHigh, tokyoLow)
+alertcondition(resistancebroken, title='Resistance Broken', message='Resistance Broken')
+alertcondition(supportbroken, title='Support Broken', message='Support Broken')
+plotshape(showsrbroken and resistancebroken, style=shape.triangleup, location=location.belowbar, color=color.new(color.lime, 0), size=size.tiny)
+plotshape(showsrbroken and supportbroken, style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0), size=size.tiny)
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main finish (market sessions)                                            ║
+// ║     main finish (support resistance)                                         ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (rsi candle)                                                  ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-src = close
-len = input.int(14, minval=1, title='Length')
-up = ta.rma(math.max(ta.change(src), 0), len)
-down = ta.rma(-math.min(ta.change(src), 0), len)
-rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - 100 / (1 + up / down)
-
-//coloring method below
-
-src1 = close
-len1 = input.int(70, minval=1, title='UpLevel')
-src2 = close
-len2 = input.int(30, minval=1, title='DownLevel')
-isup() =>
-    rsi > len1
-isdown() =>
-    rsi < len2
-isdown_1 = isdown()
-barcolor(isup() ? color.yellow : isdown_1 ? color.yellow : na)
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (rsi candle)                                                 ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (dynamic imbalance)                                           ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-var box[]   top_boxes     = array.new_box()
-var box[]   bottom_boxes     = array.new_box()
-var box[]   tested_obs = array.new_box()
-var bool matched = false
-
-color imb = color.new(#630cff,70)
-color imb_tested = color.new(color.red,60)
-
-tf = timeframe.isdaily ? 1440 : (timeframe.isweekly ? 1440*7 : (timeframe.ismonthly ? 1440*7*30 : 1))
-reqDate = timenow - 199999999*timeframe.multiplier*tf
-Imbcol = input.color(imb, 'Imbalance Color', inline="1" ,group='=== Information ===')
-Imbcol_tested = input.color(imb_tested, 'Mitigated Imbalance', inline="2" ,group='=== Information ===')
-imb_extend = input.bool(false, "Auto-extend Untested imbalance",group='=== Information ===')
-TopImbalance = low[2] <= open[1] and high[0] >= close[1]
-TopImbalancesize = low[2] - high[0]
-if TopImbalance and TopImbalancesize > 0 and time >= reqDate
-    BOX1 = box.new(left=bar_index[1], top=low[2], right=bar_index[0], bottom=high[0])
-    box.set_bgcolor(BOX1, Imbcol )
-    box.set_border_color(BOX1, na )
-    array.push(top_boxes, BOX1)
-
-BottomInbalance = high[2] >= open[1] and low[0] <= close[1]
-BottomInbalancesize = low[0] - high[2]
-if BottomInbalance and BottomInbalancesize > 0 and time >= reqDate
-    BOX2 = box.new(left=bar_index[1], top=low[0], right=bar_index[0], bottom=high[2])
-    box.set_bgcolor(BOX2, Imbcol )
-    box.set_border_color(BOX2, na )
-    array.push(bottom_boxes, BOX2)
-
-if barstate.isconfirmed
-    if array.size(top_boxes) > 0
-        for i = array.size(top_boxes) - 1 to 0 by 1
-            tbox = array.get(top_boxes, i)
-            top = box.get_top(tbox)
-            bottom = box.get_bottom(tbox)
-            ago = box.get_left(tbox)
-            if imb_extend
-                box.set_right(tbox, bar_index)
-            if high > top
-                box.set_bgcolor(tbox, Imbcol_tested)
-                if imb_extend
-                    box.set_right(tbox, ago+1)
-                array.remove(top_boxes, i)
-                continue
-            if high > bottom //and ago < 5000
-                matched := false
-                asize = array.size(tested_obs)
-                if asize > 0
-                    for j = asize - 1 to 0 by 1
-                        tbox2 = array.get(tested_obs, j)
-                        ago2 = box.get_left(tbox2)
-                        if ago==ago2
-                            matched := true
-                            box.set_bottom(tbox, high)
-                            if imb_extend
-                                box.set_right(tbox, ago+1)
-                            box.set_top(tbox2, high)
-                            break
-                if not matched
-                    BOX3 = box.copy(tbox)
-                    box.set_top(BOX3, high)
-                    box.set_bgcolor(BOX3, Imbcol_tested)
-                    if imb_extend
-                        box.set_right(BOX3, ago+1)
-                    array.push(tested_obs, BOX3)
-                    box.set_bottom(tbox, high)
-
-    if array.size(bottom_boxes) > 0
-        for i = array.size(bottom_boxes) - 1 to 0 by 1
-            tbox = array.get(bottom_boxes, i)
-            top = box.get_top(tbox)
-            bottom = box.get_bottom(tbox)
-            ago = box.get_left(tbox)
-            if imb_extend
-                box.set_right(tbox, bar_index)
-            if low < bottom
-                box.set_bgcolor(tbox, Imbcol_tested)
-                if imb_extend
-                    box.set_right(tbox, ago+1)
-                array.remove(bottom_boxes, i)
-                continue
-            if low < top //and ago < 5000
-                matched := false
-                asize = array.size(tested_obs)
-                if asize > 0
-                    for j = asize - 1 to 0 by 1
-                        tbox2 = array.get(tested_obs, j)
-                        ago2 = box.get_left(tbox2)
-                        if ago==ago2
-                            matched := true
-                            box.set_top(tbox, low)
-                            box.set_bottom(tbox2, low)
-                            break
-                if not matched
-                    BOX4 = box.copy(tbox)
-                    box.set_bottom(BOX4, low)
-                    box.set_bgcolor(BOX4, Imbcol_tested)
-                    if imb_extend
-                        box.set_right(BOX4, ago+1)
-                    array.push(tested_obs, BOX4)
-                    box.set_top(tbox, low)
-
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (dynamic imbalance)                                          ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
@@ -738,18 +426,18 @@ var is_dailyrange_enabled = input.bool(defval=true, title='Prev H/L', group='Dai
 var is_dailym_enabled = input.bool(defval=false, title='Prev Mid', group='Daily', inline='Daily')
 DailyTextType = input.bool(defval=false, title='ShortHand', group='Daily', inline='Dailysh')
 
-var is_monday_enabled = input.bool(defval=true, title='Range', group='Monday Range', inline='Monday')
+var is_monday_enabled = input.bool(defval=false, title='Range', group='Monday Range', inline='Monday')
 var is_monday_mid = input.bool(defval=false, title='Mid', group='Monday Range', inline='Monday')
 var untested_monday = false
 MondayTextType = input.bool(defval=false, title='ShortHand', group='Monday Range', inline='Mondaysh')
 
 var is_weekly_enabled = input.bool(defval=false, title='Open', group='Weekly', inline='Weekly')
-var is_weeklyrange_enabled = input.bool(defval=false, title='Prev H/L', group='Weekly', inline='Weekly')
+var is_weeklyrange_enabled = input.bool(defval=true, title='Prev H/L', group='Weekly', inline='Weekly')
 var is_weekly_mid = input.bool(defval=false, title='Prev Mid', group='Weekly', inline='Weekly')
 WeeklyTextType = input.bool(defval=false, title='ShortHand', group='Weekly', inline='Weeklysh')
 
 var is_monthly_enabled = input.bool(defval=false, title='Open', group='Monthly', inline='Monthly')
-var is_monthlyrange_enabled = input.bool(defval=false, title='Prev H/L', group='Monthly', inline='Monthly')
+var is_monthlyrange_enabled = input.bool(defval=true, title='Prev H/L', group='Monthly', inline='Monthly')
 var is_monthly_mid = input.bool(defval=false, title='Prev Mid', group='Monthly', inline='Monthly')
 MonthlyTextType = input.bool(defval=false, title='ShortHand', group='Monthly', inline='Monthlysh')
 
@@ -1864,5 +1552,11 @@ if barstate.islast
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
 // ║     main finish (key levels)                                                 ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║                That's all Folks !                                            ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝

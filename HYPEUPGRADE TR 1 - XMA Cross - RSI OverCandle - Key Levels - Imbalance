@@ -1,14 +1,16 @@
+//©HYPEUPGRADETR (based multible sources, modified and optimised by HYPEUPGRADETR)
 //@version=5
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║ SR Channel                                                                   ║
+// ║ MA Cross                                                                     ║
+// ║ RSI Candle                                                                   ║
 // ║ Key Levels                                                                   ║
-// ║ Supertrend                                                                   ║
-// ║ Kaufmann                                                                     ║
+// ║ Imbalance                                                                    ║
 // ║                                                                              ║
 // ║ developer : HYPEUPGRADETR                                                    ║
-// ║ creators  : HYPEUPGRADETR, LonesomeTheblue, Spaceman, everget, Hpotter       ║
+// ║ creators  : HYPEUPGRADETR , mrsebqstianc, spaceman, glaz, travelling_trader  ║
+// ║                                                                              ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
 // ║ at https://mozilla.org/MPL/2.0/                                              ║
@@ -53,304 +55,126 @@ WHITE   = #FFFFFF
 // ╚══════════════════════════════════════╝
 
 
-indicator(title='HYPEUPGRADETR 3', overlay=true, max_bars_back=1000, max_lines_count=500, max_labels_count=400, max_boxes_count=200)
+indicator(title='HYPEUPGRADETR 1', overlay=true, max_lines_count=500, max_boxes_count=500)
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (supertrend)                                                  ║
+// ║     main start (ma cross)                                                    ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-
-length = input(title='ATR Period', defval=22)
-mult = input.float(title='ATR Multiplier', step=0.1, defval=3)
-src = input(title='Source', defval=hl2)
-wicks = input(title='Take Wicks into Account ?', defval=false)
-showLabels = input(title='Show Buy/Sell Labels ?', defval=true)
-highlightState = input(title='Highlight State ?', defval=true)
-
-atr = mult * ta.atr(length)
-
-highPrice = wicks ? high : close
-lowPrice = wicks ? low : close
-doji4price = open == close and open == low and open == high
-
-longStop = src - atr
-longStopPrev = nz(longStop[1], longStop)
-
-if longStop > 0
-    if doji4price
-        longStop := longStopPrev
-        longStop
-    else
-        longStop := lowPrice[1] > longStopPrev ? math.max(longStop, longStopPrev) : longStop
-        longStop
-else
-    longStop := longStopPrev
-    longStop
-
-shortStop = src + atr
-shortStopPrev = nz(shortStop[1], shortStop)
-
-if shortStop > 0
-    if doji4price
-        shortStop := shortStopPrev
-        shortStop
-    else
-        shortStop := highPrice[1] < shortStopPrev ? math.min(shortStop, shortStopPrev) : shortStop
-        shortStop
-else
-    shortStop := shortStopPrev
-    shortStop
-
-var int dir = 1
-dir := dir == -1 and highPrice > shortStopPrev ? 1 : dir == 1 and lowPrice < longStopPrev ? -1 : dir
-
-var color longColor = color.green
-var color shortColor = color.red
-
-longStopPlot = plot(dir == 1 ? longStop : na, title='Long Stop', style=plot.style_linebr, linewidth=2, color=color.new(longColor, 0))
-buySignal = dir == 1 and dir[1] == -1
-plotshape(buySignal ? longStop : na, title='Long Stop Start', location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(longColor, 0))
-plotshape(buySignal and showLabels ? longStop : na, title='Buy Label', text='Buy Trend', location=location.absolute, style=shape.labelup, size=size.tiny, color=color.new(longColor, 0), textcolor=color.new(color.white, 0))
-
-shortStopPlot = plot(dir == 1 ? na : shortStop, title='Short Stop', style=plot.style_linebr, linewidth=2, color=color.new(shortColor, 0))
-sellSignal = dir == -1 and dir[1] == 1
-plotshape(sellSignal ? shortStop : na, title='Short Stop Start', location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(shortColor, 0))
-plotshape(sellSignal and showLabels ? shortStop : na, title='Sell Label', text='Sell Trend', location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.new(shortColor, 0), textcolor=color.new(color.white, 0))
-
-midPricePlot = plot(ohlc4, title='', style=plot.style_circles, linewidth=0, display=display.none, editable=false)
-
-longFillColor = highlightState ? dir == 1 ? longColor : na : na
-shortFillColor = highlightState ? dir == -1 ? shortColor : na : na
-fill(midPricePlot, longStopPlot, title='Long State Filling', color=longFillColor, transp=90)
-fill(midPricePlot, shortStopPlot, title='Short State Filling', color=shortFillColor, transp=90)
-
-changeCond = dir != dir[1]
-alertcondition(changeCond, title='Alert: SuperTrend Direction Change', message='SuperTrend has changed direction!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
-alertcondition(buySignal, title='Alert: SuperTrend Buy', message='SuperTrend Buy!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
-alertcondition(sellSignal, title='Alert: SuperTrend Sell', message='SuperTrend Sell!\nSymbol: {{exchange}}:{{ticker}}\nPrice: {{close}}')
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (supertrend)                                                 ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+s3 = input.string(title='MA Type 3', defval='SMA', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len3 = input.int(20, minval=1, title='Length 3')
+res3 = input.timeframe(title='Resolution 3', defval='D')
+src3 = input(close, title='Source 3')
+s4 = input.string(title='MA Type4', defval='SMA', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len4 = input.int(50, minval=1, title='Length 4')
+res4 = input.timeframe(title='Resolution 4', defval='D')
+src4 = input(close, title='Source 4')
+s5 = input.string(title='MA Type 5', defval='SMA', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len5 = input.int(200, minval=2, title='Length 5')
+res5 = input.timeframe(title='Resolution 5', defval='D')
+src5 = input(close, title='Source 5')
+s6 = input.string(title='MA Type6', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len6 = input.int(100, minval=1, title='Length6')
+res6 = input.timeframe(title='Resolution 6', defval='D')
+src6 = input(close, title='Source6')
+s7 = input.string(title='MA Type 7', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len7 = input.int(100, minval=1, title='Length 7')
+res7 = input.timeframe(title='Resolution 7', defval='D')
+src7 = input(close, title='Source 7')
+s8 = input.string(title='MA Type 8', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len8 = input.int(100, minval=1, title='Length 8')
+res8 = input.timeframe(title='Resolution 8', defval='D')
+src8 = input(close, title='Source 8')
+s9 = input.string(title='MA Type 9', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len9 = input.int(100, minval=1, title='Length 9')
+res9 = input.timeframe(title='Resolution 9', defval='D')
+src9 = input(close, title='Source 9')
+s10 = input.string(title='MA Type 10', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len10 = input.int(100, minval=1, title='Length 10')
+res10 = input.timeframe(title='Resolution 10', defval='D')
+src10 = input(close, title='Source1 0')
+s11 = input.string(title='MA Type 11', defval='na', options=['na', 'SMA', 'EMA', 'WMA'])
+len11 = input.int(100, minval=1, title='Length 11')
+res11 = input.timeframe(title='Resolution 11', defval='D')
+src11 = input(close, title='Source 11')
+s12 = input.string(title='MA Type 12', defval='na', options=['na', 'SMA', 'EMA', 'WMA', 'RMA'])
+len12 = input.int(100, minval=1, title='Length 12')
+res12 = input.timeframe(title='Resolution 12', defval='D')
+src12 = input(close, title='Source 12')
 
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (kaufman)                                                     ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+out3 = s3 == 'na' ? na : s3 == 'SMA' ? ta.sma(src3, len3) : s3 == 'EMA' ? ta.ema(src3, len3) : s3 == 'WMA' ? ta.wma(src3, len3) : s3 == 'RMA' ? ta.rma(src3, len3) : na
+out4 = s4 == 'na' ? na : s4 == 'SMA' ? ta.sma(src4, len4) : s4 == 'EMA' ? ta.ema(src4, len4) : s4 == 'WMA' ? ta.wma(src4, len4) : s4 == 'RMA' ? ta.rma(src4, len4) : na
+out5 = s5 == 'na' ? na : s5 == 'SMA' ? ta.sma(src5, len5) : s5 == 'EMA' ? ta.ema(src5, len5) : s5 == 'WMA' ? ta.wma(src5, len5) : s5 == 'RMA' ? ta.rma(src5, len5) : na
+out6 = s6 == 'na' ? na : s6 == 'SMA' ? ta.sma(src6, len6) : s6 == 'EMA' ? ta.ema(src6, len6) : s6 == 'WMA' ? ta.wma(src6, len6) : s6 == 'RMA' ? ta.rma(src6, len6) : na
+out7 = s7 == 'na' ? na : s7 == 'SMA' ? ta.sma(src7, len7) : s7 == 'EMA' ? ta.ema(src7, len7) : s7 == 'WMA' ? ta.wma(src7, len7) : s7 == 'RMA' ? ta.rma(src7, len7) : na
+out8 = s8 == 'na' ? na : s8 == 'SMA' ? ta.sma(src8, len8) : s8 == 'EMA' ? ta.ema(src8, len8) : s8 == 'WMA' ? ta.wma(src8, len8) : s8 == 'RMA' ? ta.rma(src8, len8) : na
+out9 = s9 == 'na' ? na : s9 == 'SMA' ? ta.sma(src9, len9) : s9 == 'EMA' ? ta.ema(src9, len9) : s9 == 'WMA' ? ta.wma(src9, len9) : s9 == 'RMA' ? ta.rma(src9, len9) : na
+out10 = s10 == 'na' ? na : s10 == 'SMA' ? ta.sma(src10, len10) : s10 == 'EMA' ? ta.ema(src10, len10) : s10 == 'WMA' ? ta.wma(src10, len10) : s10 == 'RMA' ? ta.rma(src10, len10) : na
+out11 = s11 == 'na' ? na : s11 == 'SMA' ? ta.sma(src11, len11) : s11 == 'EMA' ? ta.ema(src11, len11) : s11 == 'WMA' ? ta.wma(src11, len11) : s11 == 'RMA' ? ta.rma(src11, len11) : na
+out12 = s12 == 'na' ? na : s12 == 'SMA' ? ta.sma(src12, len12) : s12 == 'EMA' ? ta.ema(src12, len12) : s12 == 'WMA' ? ta.wma(src12, len12) : s12 == 'RMA' ? ta.rma(src12, len12) : na
 
-Length = input.int(21, minval=1)
-xPrice = close
-xvnoise = math.abs(xPrice - xPrice[1])
-nAMA = 0.0
-nfastend = 0.666
-nslowend = 0.0645
-nsignal = math.abs(xPrice - xPrice[Length])
-nnoise = math.sum(xvnoise, Length)
-nefratio = nnoise != 0 ? nsignal / nnoise : 0
-nsmooth = math.pow(nefratio * (nfastend - nslowend) + nslowend, 2)
-nAMA := nz(nAMA[1]) + nsmooth * (xPrice - nz(nAMA[1]))
-plot(nAMA, color=color.new(color.blue, 0), title='KAMA')
+a3 = request.security(syminfo.tickerid, res3, out3)
+a4 = request.security(syminfo.tickerid, res4, out4)
+a5 = request.security(syminfo.tickerid, res5, out5)
+a6 = request.security(syminfo.tickerid, res6, out6)
+a7 = request.security(syminfo.tickerid, res7, out7)
+a8 = request.security(syminfo.tickerid, res8, out8)
+a9 = request.security(syminfo.tickerid, res9, out9)
+a10 = request.security(syminfo.tickerid, res10, out10)
+a11 = request.security(syminfo.tickerid, res11, out11)
+a12 = request.security(syminfo.tickerid, res12, out12)
+
+plot(a3, color=color.new(color.red, 0))
+plot(a4, color=color.new(color.blue, 0))
+plot(a5, color=color.new(#000000, 0))
+plot(a6, color=color.new(color.purple, 0))
+plot(a7, color=color.new(color.orange, 0))
+plot(a8, color=color.new(color.olive, 0))
+plot(a9, color=color.new(color.navy, 0))
+plot(a10, color=color.new(color.maroon, 0))
+plot(a11, color=color.new(color.aqua, 0))
+plot(a12, color=color.new(color.fuchsia, 0))
+
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main finish (kaufman)                                                    ║
+// ║     main finish (ma cross)                                                   ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (support resistance)                                          ║
+// ║     main start (rsi candle)                                                  ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-prd = input.int(defval=10, title='Pivot Period', minval=4, maxval=30, group='=== S/R CHANNEL SETTINGS ===', tooltip='Used while calculating Pivot Points, checks left&right bars')
-ppsrc = input.string(defval='High/Low', title='Source', options=['High/Low', 'Close/Open'], group='=== S/R CHANNEL SETTINGS ===', tooltip='Source for Pivot Points')
-ChannelW = input.int(defval=5, title='Maximum Channel Width %', minval=1, maxval=8, group='=== S/R CHANNEL SETTINGS ===', tooltip='Calculated using Highest/Lowest levels in 300 bars')
-minstrength = input.int(defval=1, title='Minimum Strength', minval=1, group='=== S/R CHANNEL SETTINGS ===', tooltip='Channel must contain at least 2 Pivot Points')
-maxnumsr = input.int(defval=6, title='Maximum Number of S/R', minval=1, maxval=10, group='=== S/R CHANNEL SETTINGS ===', tooltip='Maximum number of Support/Resistance Channels to Show') - 1
-loopback = input.int(defval=400, title='Loopback Period', minval=100, maxval=400, group='=== S/R CHANNEL SETTINGS ===', tooltip='While calculating S/R levels it checks Pivots in Loopback Period')
-res_col = input.color(defval=color.new(color=#f7525f, transp=65), title='Resistance Color', group='=== S/R COLOR SETTINGS ===')
-sup_col = input.color(defval=color.new(color=#00e676, transp=65), title='Support Color', group='=== S/R COLOR SETTINGS ===')
-inch_col = input.color(defval=color.new(color=#ffeb3b, transp=50), title='Color When Price in Channel', group='=== S/R COLOR SETTINGS ===')
-showpp = input.bool(defval=false, title='Show Pivot Points', group='=== S/R EXTRA SETTINGS ===')
-showsrbroken = input.bool(defval=false, title='Show Broken Support/Resistance', group='=== S/R EXTRA SETTINGS ===')
+src = close
+len = input.int(14, minval=1, title='Length')
+up = ta.rma(math.max(ta.change(src), 0), len)
+down = ta.rma(-math.min(ta.change(src), 0), len)
+rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - 100 / (1 + up / down)
 
+//coloring method below
 
-// get Pivot High/low
-float src1 = ppsrc == 'High/Low' ? high : math.max(close, open)
-float src2 = ppsrc == 'High/Low' ? low : math.min(close, open)
-float ph = ta.pivothigh(src1, prd, prd)
-float pl = ta.pivotlow(src2, prd, prd)
-
-// draw Pivot points
-plotshape(ph and showpp, text='H', style=shape.labeldown, color=na, textcolor=color.new(color.red, 0), location=location.abovebar, offset=-prd)
-plotshape(pl and showpp, text='L', style=shape.labelup, color=na, textcolor=color.new(color.lime, 0), location=location.belowbar, offset=-prd)
-
-//calculate maximum S/R channel width
-prdhighest = ta.highest(300)
-prdlowest = ta.lowest(300)
-cwidth = (prdhighest - prdlowest) * ChannelW / 100
-
-// get/keep Pivot levels
-var pivotvals = array.new_float(0)
-var pivotlocs = array.new_float(0)
-if ph or pl
-    array.unshift(pivotvals, ph ? ph : pl)
-    array.unshift(pivotlocs, bar_index)
-    for x = array.size(pivotvals) - 1 to 0 by 1
-        if bar_index - array.get(pivotlocs, x) > loopback  // remove old pivot points
-            array.pop(pivotvals)
-            array.pop(pivotlocs)
-            continue
-        break
-
-//find/create SR channel of a pivot point
-get_sr_vals(ind) =>
-    float lo = array.get(pivotvals, ind)
-    float hi = lo
-    int numpp = 0
-    for y = 0 to array.size(pivotvals) - 1 by 1
-        float cpp = array.get(pivotvals, y)
-        float wdth = cpp <= hi ? hi - cpp : cpp - lo
-        if wdth <= cwidth  // fits the max channel width?
-            if cpp <= hi
-                lo := math.min(lo, cpp)
-                lo
-            else
-                hi := math.max(hi, cpp)
-                hi
-
-            numpp += 20  // each pivot point added as 20
-            numpp
-    [hi, lo, numpp]
-
-// keep old SR channels and calculate/sort new channels if we met new pivot point
-var suportresistance = array.new_float(20, 0)  // min/max levels
-changeit(x, y) =>
-    tmp = array.get(suportresistance, y * 2)
-    array.set(suportresistance, y * 2, array.get(suportresistance, x * 2))
-    array.set(suportresistance, x * 2, tmp)
-    tmp := array.get(suportresistance, y * 2 + 1)
-    array.set(suportresistance, y * 2 + 1, array.get(suportresistance, x * 2 + 1))
-    array.set(suportresistance, x * 2 + 1, tmp)
-
-if ph or pl
-    supres = array.new_float(0)  // number of pivot, strength, min/max levels
-    stren = array.new_float(10, 0)
-    // get levels and strengs
-    for x = 0 to array.size(pivotvals) - 1 by 1
-        [hi, lo, strength] = get_sr_vals(x)
-        array.push(supres, strength)
-        array.push(supres, hi)
-        array.push(supres, lo)
-
-    // add each HL to strengh
-    for x = 0 to array.size(pivotvals) - 1 by 1
-        h = array.get(supres, x * 3 + 1)
-        l = array.get(supres, x * 3 + 2)
-        s = 0
-        for y = 0 to loopback by 1
-            if high[y] <= h and high[y] >= l or low[y] <= h and low[y] >= l
-                s += 1
-                s
-        array.set(supres, x * 3, array.get(supres, x * 3) + s)
-
-    //reset SR levels
-    array.fill(suportresistance, 0)
-    // get strongest SRs
-    src = 0
-    for x = 0 to array.size(pivotvals) - 1 by 1
-        stv = -1.  // value
-        stl = -1  // location
-        for y = 0 to array.size(pivotvals) - 1 by 1
-            if array.get(supres, y * 3) > stv and array.get(supres, y * 3) >= minstrength * 20
-                stv := array.get(supres, y * 3)
-                stl := y
-                stl
-        if stl >= 0
-            //get sr level
-            hh = array.get(supres, stl * 3 + 1)
-            ll = array.get(supres, stl * 3 + 2)
-            array.set(suportresistance, src * 2, hh)
-            array.set(suportresistance, src * 2 + 1, ll)
-            array.set(stren, src, array.get(supres, stl * 3))
-
-            // make included pivot points' strength zero
-            for y = 0 to array.size(pivotvals) - 1 by 1
-                if array.get(supres, y * 3 + 1) <= hh and array.get(supres, y * 3 + 1) >= ll or array.get(supres, y * 3 + 2) <= hh and array.get(supres, y * 3 + 2) >= ll
-                    array.set(supres, y * 3, -1)
-
-            src += 1
-            if src >= 10
-                break
-
-    for x = 0 to 8 by 1
-        for y = x + 1 to 9 by 1
-            if array.get(stren, y) > array.get(stren, x)
-                tmp = array.get(stren, y)
-                array.set(stren, y, array.get(stren, x))
-                changeit(x, y)
-
-
-get_level(ind) =>
-    float ret = na
-    if ind < array.size(suportresistance)
-        if array.get(suportresistance, ind) != 0
-            ret := array.get(suportresistance, ind)
-            ret
-    ret
-
-get_color(ind) =>
-    color ret = na
-    if ind < array.size(suportresistance)
-        if array.get(suportresistance, ind) != 0
-            ret := array.get(suportresistance, ind) > close and array.get(suportresistance, ind + 1) > close ? res_col : array.get(suportresistance, ind) < close and array.get(suportresistance, ind + 1) < close ? sup_col : inch_col
-            ret
-    ret
-
-var srchannels = array.new_box(10)
-for x = 0 to math.min(9, maxnumsr) by 1
-    box.delete(array.get(srchannels, x))
-    srcol = get_color(x * 2)
-    if not na(srcol)
-        array.set(srchannels, x, box.new(left=bar_index, top=get_level(x * 2), right=bar_index + 1, bottom=get_level(x * 2 + 1), border_color=srcol, border_width=0, extend=extend.left, bgcolor=srcol))
-
-resistancebroken = false
-supportbroken = false
-
-// check if it's not in a channel
-not_in_a_channel = true
-for x = 0 to math.min(9, maxnumsr) by 1
-    if close <= array.get(suportresistance, x * 2) and close >= array.get(suportresistance, x * 2 + 1)
-        not_in_a_channel := false
-        not_in_a_channel
-
-// if price is not in a channel then check broken ones
-if not_in_a_channel
-    for x = 0 to math.min(9, maxnumsr) by 1
-        if close[1] <= array.get(suportresistance, x * 2) and close > array.get(suportresistance, x * 2)
-            resistancebroken := true
-            resistancebroken
-        if close[1] >= array.get(suportresistance, x * 2 + 1) and close < array.get(suportresistance, x * 2 + 1)
-            supportbroken := true
-            supportbroken
-
-alertcondition(resistancebroken, title='Resistance Broken', message='Resistance Broken')
-alertcondition(supportbroken, title='Support Broken', message='Support Broken')
-plotshape(showsrbroken and resistancebroken, style=shape.triangleup, location=location.belowbar, color=color.new(color.lime, 0), size=size.tiny)
-plotshape(showsrbroken and supportbroken, style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0), size=size.tiny)
+src1 = close
+len1 = input.int(70, minval=1, title='UpLevel')
+src2 = close
+len2 = input.int(30, minval=1, title='DownLevel')
+isup() =>
+    rsi > len1
+isdown() =>
+    rsi < len2
+isdown_1 = isdown()
+barcolor(isup() ? color.yellow : isdown_1 ? color.yellow : na)
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main finish (support resistance)                                         ║
+// ║     main finish (rsi candle)                                                 ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
@@ -1551,6 +1375,122 @@ if barstate.islast
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
 // ║     main finish (key levels)                                                 ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (dynamic imbalance)                                           ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+var box[]   top_boxes     = array.new_box()
+var box[]   bottom_boxes     = array.new_box()
+var box[]   tested_obs = array.new_box()
+var bool matched = false
+
+color imb = color.new(#630cff,70)
+color imb_tested = color.new(color.red,60)
+
+tf = timeframe.isdaily ? 1440 : (timeframe.isweekly ? 1440*7 : (timeframe.ismonthly ? 1440*7*30 : 1))
+reqDate = timenow - 199999999*timeframe.multiplier*tf
+Imbcol = input.color(imb, 'Imbalance Color', inline="1" ,group='=== Information ===')
+Imbcol_tested = input.color(imb_tested, 'Mitigated Imbalance', inline="2" ,group='=== Information ===')
+imb_extend = input.bool(false, "Auto-extend Untested imbalance",group='=== Information ===')
+TopImbalance = low[2] <= open[1] and high[0] >= close[1]
+TopImbalancesize = low[2] - high[0]
+if TopImbalance and TopImbalancesize > 0 and time >= reqDate
+    BOX1 = box.new(left=bar_index[1], top=low[2], right=bar_index[0], bottom=high[0])
+    box.set_bgcolor(BOX1, Imbcol )
+    box.set_border_color(BOX1, na )
+    array.push(top_boxes, BOX1)
+
+BottomInbalance = high[2] >= open[1] and low[0] <= close[1]
+BottomInbalancesize = low[0] - high[2]
+if BottomInbalance and BottomInbalancesize > 0 and time >= reqDate
+    BOX2 = box.new(left=bar_index[1], top=low[0], right=bar_index[0], bottom=high[2])
+    box.set_bgcolor(BOX2, Imbcol )
+    box.set_border_color(BOX2, na )
+    array.push(bottom_boxes, BOX2)
+
+if barstate.isconfirmed
+    if array.size(top_boxes) > 0
+        for i = array.size(top_boxes) - 1 to 0 by 1
+            tbox = array.get(top_boxes, i)
+            top = box.get_top(tbox)
+            bottom = box.get_bottom(tbox)
+            ago = box.get_left(tbox)
+            if imb_extend
+                box.set_right(tbox, bar_index)
+            if high > top
+                box.set_bgcolor(tbox, Imbcol_tested)
+                if imb_extend
+                    box.set_right(tbox, ago+1)
+                array.remove(top_boxes, i)
+                continue
+            if high > bottom //and ago < 5000
+                matched := false
+                asize = array.size(tested_obs)
+                if asize > 0
+                    for j = asize - 1 to 0 by 1
+                        tbox2 = array.get(tested_obs, j)
+                        ago2 = box.get_left(tbox2)
+                        if ago==ago2
+                            matched := true
+                            box.set_bottom(tbox, high)
+                            if imb_extend
+                                box.set_right(tbox, ago+1)
+                            box.set_top(tbox2, high)
+                            break
+                if not matched
+                    BOX3 = box.copy(tbox)
+                    box.set_top(BOX3, high)
+                    box.set_bgcolor(BOX3, Imbcol_tested)
+                    if imb_extend
+                        box.set_right(BOX3, ago+1)
+                    array.push(tested_obs, BOX3)
+                    box.set_bottom(tbox, high)
+
+    if array.size(bottom_boxes) > 0
+        for i = array.size(bottom_boxes) - 1 to 0 by 1
+            tbox = array.get(bottom_boxes, i)
+            top = box.get_top(tbox)
+            bottom = box.get_bottom(tbox)
+            ago = box.get_left(tbox)
+            if imb_extend
+                box.set_right(tbox, bar_index)
+            if low < bottom
+                box.set_bgcolor(tbox, Imbcol_tested)
+                if imb_extend
+                    box.set_right(tbox, ago+1)
+                array.remove(bottom_boxes, i)
+                continue
+            if low < top //and ago < 5000
+                matched := false
+                asize = array.size(tested_obs)
+                if asize > 0
+                    for j = asize - 1 to 0 by 1
+                        tbox2 = array.get(tested_obs, j)
+                        ago2 = box.get_left(tbox2)
+                        if ago==ago2
+                            matched := true
+                            box.set_top(tbox, low)
+                            box.set_bottom(tbox2, low)
+                            break
+                if not matched
+                    BOX4 = box.copy(tbox)
+                    box.set_bottom(BOX4, low)
+                    box.set_bgcolor(BOX4, Imbcol_tested)
+                    if imb_extend
+                        box.set_right(BOX4, ago+1)
+                    array.push(tested_obs, BOX4)
+                    box.set_top(tbox, low)
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (dynamic imbalance)                                          ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
