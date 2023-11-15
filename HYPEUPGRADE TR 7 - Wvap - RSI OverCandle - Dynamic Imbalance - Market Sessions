@@ -70,12 +70,12 @@ TokyoTimeX     = input.session(defval="0430-1100", title='     ', inli
 TokyoCol       = input.color(color.rgb(187, 19, 61, 90), '' , inline='Tokyo', group='Sessions')
 // Session 2 - user inputs
 showLondon     = input.bool(true, '', inline='London', group='Sessions')
-stringLondon   = input.string('London Open', '', inline='London', group='Sessions')
+stringLondon   = input.string('London', '', inline='London', group='Sessions')
 LondonTimeX    = input.session(defval="1100-1930", title='     ', inline='London2', group='Sessions', tooltip = 'If you want to change the start/end time of the session, just make sure they are in UTC. There is no need to change the timezone of your Tradingview chart or to change the Timezone input below, because the sessions will be plotted correctly as long as the start/end time is set in UTC.')
 LondonCol      = input.color(color.rgb(93, 96, 107, 90), '' , inline='London', group='Sessions')
 // Session 3 - user inputs
 showNewYork    = input.bool(true, title='', inline='New York', group='Sessions')
-stringNewYork  = input.string('New York Open', '', inline='New York', group='Sessions')
+stringNewYork  = input.string('New York', '', inline='New York', group='Sessions')
 NewYorkTimeX   = input.session(defval="1730-0000", title='     ', inline='New York2', group='Sessions', tooltip = 'If you want to change the start/end time of the session, just make sure they are in UTC. There is no need to change the timezone of your Tradingview chart or to change the Timezone input below, because the sessions will be plotted correctly as long as the start/end time is set in UTC.')
 NewYorkCol     = input.color(color.rgb(93, 96, 107, 90), '', inline='New York', group='Sessions')
 // Session 4 - user inputs
