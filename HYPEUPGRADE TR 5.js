@@ -28,23 +28,23 @@ GRN01 = #7CFC00, GRN02 = #32CD32, GRN03 = #228B22, GRN04 = #006400, GRN05 = #008
 RED01 = #FF4500, RED02 = #FF0000, RED03 = #B22222, RED04 = #8B0000, RED05 = #800000, RED06=#330d06
 
 // ──────────[ v3 Style Colors ]
-AQUA    = #00FFFF
-BLACK   = #000000
-BLUE    = #0000FF
-FUCHSIA = #FF00FF
-GRAY    = #808080
-GREEN   = #008000
-LIME    = #00FF00
-MAROON  = #800000
-NAVY    = #000080
-OLIVE   = #808000
-ORANGE  = #FF7F00
-PURPLE  = #800080
-RUBI    = #FF0000
-SILVER  = #C0C0C0
-TEAL    = #008080
-YELLOW  = #FFFF00
-WHITE   = #FFFFFF
+//AQUA    = #00FFFF
+//BLACK   = #000000
+//BLUE    = #0000FF
+//FUCHSIA = #FF00FF
+//GRAY    = #808080
+//GREEN   = #008000
+//LIME    = #00FF00
+//MAROON  = #800000
+//NAVY    = #000080
+//OLIVE   = #808000
+//ORANGE  = #FF7F00
+//PURPLE  = #800080
+//RUBI    = #FF0000
+//SILVER  = #C0C0C0
+//TEAL    = #008080
+//YELLOW  = #FFFF00
+//WHITE   = #FFFFFF
 
 // ╔══════════════════════════════════════╗
 // ║                                      ║
@@ -58,6 +58,573 @@ indicator('HYPEUPGRADETR 5', overlay=true, max_boxes_count=500, max_lines_count=
 //indicator('Imbalance Finder Dynamic', overlay=true, max_lines_count=500, max_boxes_count=500)
 //indicator('Key Levels SpacemanBTC IDWM', shorttitle='SpacemanBTC Key Level V13.1', overlay=true, max_lines_count=100)
 //indicator("Supertrend-Fib", overlay = true, max_lines_count = 500, max_labels_count = 500)
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (fib levels)                                                  ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+import PineCoders/VisibleChart/4 as chart
+
+// Colors 
+color BLACK   = color.black
+color GRAY    = color.gray
+color RED     = color.red
+color ORANGE  = color.orange
+color TEAL    = color.teal
+color RUBY    = #e91e63
+color AQUA    = color.aqua
+color BLUE    = color.blue
+color GREEN   = color.green
+color PURPLE  = color.purple
+color LIME    = color.lime
+color FUCHSIA = color.fuchsia
+
+// Line Type 
+string TY01 = " ─ Line"
+string TY02 = " ┄ Dashed line"
+string TY03 = " ┉ Dotted line"
+
+// Fib level type
+string LV01  = "Values" 
+string LV02  = "Percent" 
+
+// Fib calculation type
+string FT01  = "Visible Chart Range" 
+string FT02  = "Visible Zig Zag"
+
+// Label placement 
+string LB01  = "Left"
+string LB02  = "Center"
+string LB03  = "Right"
+string LB04  = "Top"
+string LB05  = "Middle"
+string LB06  = "Bottom"
+
+// Label Size
+string SZ01  = "tiny"
+string SZ02  = "small"
+string SZ03  = "normal"
+string SZ04  = "large"
+string SZ05  = "huge"
+
+// Tool Tips 
+string TT_FT = "Choose from 2 calculation types:
+ \n\n• 'Visible Chart Range' \nCalculates the Fibonacci retracement based on the high and low of the visible chart range.
+ \n\n• 'Visible Zig Zag' \nCalculates the Fibonacci retracement based on zig zag pivots within the visible chart range."
+string TT_ZZ = "Show Zig Zag lines when the 'Visible Zig Zag' display type is enabled."
+string TT_MP = "When enabled, adds a pivot in the opposite direction if a new pivot is not found in the number of bars in the 'Pivot Length'."
+string TT_PL = "Number of bars back to track pivots (ex. Highest point in 50 bars)."
+string TT_ZA = "Your choices here dictate the Zig Zag line color, line width, and line style."
+string TT_LP = "Places the fib retracement on the nth pivot point back from the last visible pivot."
+
+// Inputs
+string fibTypeInput      = input.string(FT01,  "Fib Calculation Type",      options = [FT01, FT02],      tooltip = TT_FT, group="/// FIB LEVELS ///")
+
+string GRP1              = "Visible ZigZag"
+bool   showZZInput       = input.bool(true,    "Show Zig Zag",              group = GRP1, inline = "00", tooltip = TT_ZZ, group="/// FIB LEVELS ///")
+bool   addPivotInput     = input.bool(true,    "Detect additional pivots",  group = GRP1, inline = "01", tooltip = TT_MP, group="/// FIB LEVELS ///")
+int    lengthInput       = input.int(50,       "   Pivot Length",           group = GRP1, minval = 1,    tooltip = TT_PL, group="/// FIB LEVELS ///")
+color  zzBullColorInput  = input.color(GRAY,   "   ",                       group = GRP1, inline = "02", group="/// FIB LEVELS ///")
+color  zzBearColorInput  = input.color(GRAY,   "",                          group = GRP1, inline = "02", group="/// FIB LEVELS ///")
+int    zzwidthInput      = input.int(2,        "",                          group = GRP1, inline = "02", minval  = 1, group="/// FIB LEVELS ///")
+string zzStyleInput      = input.string(TY01,  "",                          group = GRP1, inline = "02", tooltip = TT_ZA, options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
+int    pivotInput        = input.int(1,        "   nth Last Pivot",         group = GRP1, minval = 0,    tooltip = TT_LP, group="/// FIB LEVELS ///")
+
+string GRP2              = "Fib Levels"
+bool   extendRtInput     = input.bool(true,    "Extend to real time",       group = GRP2, group="/// FIB LEVELS ///")
+bool   extendRightInput  = input.bool(false,   "Extend lines right",        group = GRP2, group="/// FIB LEVELS ///")
+bool   extendLeftInput   = input.bool(false,   "Extend lines left",         group = GRP2, group="/// FIB LEVELS ///")
+bool   trendLineInput    = input.bool(true,    "Trend Line",                group = GRP2, inline = "10", group="/// FIB LEVELS ///")
+color  trendColorInput   = input.color(BLACK,   "",                          group = GRP2, inline = "10", group="/// FIB LEVELS ///")
+int    trendWidthInput   = input.int(1,        "",                          group = GRP2, inline = "10", minval  = 1, group="/// FIB LEVELS ///")
+string trendStyleInput   = input.string(TY02,  "",                          group = GRP2, inline = "10", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
+int    levelsWidthInput  = input.int(1,        "Levels Line",               group = GRP2, inline = "11", minval  = 1, group="/// FIB LEVELS ///")
+string fibStyleInput     = input.string(TY01,  "",                          group = GRP2, inline = "11", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
+string extStyleInput     = input.string(TY02,  "",                          group = GRP2, inline = "11", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
+bool   show000Input      = input.bool(true,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+float  level000Input     = input.float(0,      "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+color  color000Input     = input.color(BLACK,   "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+bool   show236Input      = input.bool(true,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+float  level236Input     = input.float(0.236,  "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+color  color236Input     = input.color(BLACK,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+bool   show382Input      = input.bool(true,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+float  level382Input     = input.float(0.382,  "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+color  color382Input     = input.color(BLACK, "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+bool   show500Input      = input.bool(true,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+float  level500Input     = input.float(0.5,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+color  color500Input     = input.color(BLACK,  "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+bool   show618Input      = input.bool(true,    "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+float  level618Input     = input.float(0.618,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+color  color618Input     = input.color(BLACK,   "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+bool   show786Input      = input.bool(true,    "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+float  level786Input     = input.float(0.786,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+color  color786Input     = input.color(BLACK,   "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+bool   show100Input      = input.bool(true,    "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+float  level100Input     = input.float(1,      "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+color  color100Input     = input.color(BLACK,   "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+bool   show161Input      = input.bool(true,    "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+float  level161Input     = input.float(0.705,  "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+color  color161Input     = input.color(BLACK,   "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+bool   show261Input      = input.bool(true,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+float  level261Input     = input.float(-0.27,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+color  color261Input     = input.color(BLACK,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+bool   show361Input      = input.bool(true,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+float  level361Input     = input.float(-0.62,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+color  color361Input     = input.color(BLACK, "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+bool   show423Input      = input.bool(true,    "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+float  level423Input     = input.float(-1,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+color  color423Input     = input.color(BLACK,   "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+bool   show127Input      = input.bool(true,   "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+float  level127Input     = input.float(0.889,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+color  color127Input     = input.color(BLACK, "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+bool   show141Input      = input.bool(true,   "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+float  level141Input     = input.float(-0.5,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+color  color141Input     = input.color(BLACK,    "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+bool   show227Input      = input.bool(false,   "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+float  level227Input     = input.float(2.272,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+color  color227Input     = input.color(BLACK, "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+bool   show241Input      = input.bool(false,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+float  level241Input     = input.float(2.414,  "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+color  color241Input     = input.color(BLACK,  "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+bool   show200Input      = input.bool(false,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+float  level200Input     = input.float(2,      "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+color  color200Input     = input.color(BLACK,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+bool   show300Input      = input.bool(false,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+float  level300Input     = input.float(3,      "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+color  color300Input     = input.color(BLACK,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+bool   show327Input      = input.bool(false,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+float  level327Input     = input.float(3.272,  "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+color  color327Input     = input.color(BLACK,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+bool   show341Input      = input.bool(false,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+float  level341Input     = input.float(3.414,  "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+color  color341Input     = input.color(BLACK,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+bool   show400Input      = input.bool(false,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+float  level400Input     = input.float(4,      "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+color  color400Input     = input.color(BLACK,    "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
+bool   show427Input      = input.bool(false,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+float  level427Input     = input.float(4.272,  "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+color  color427Input     = input.color(BLACK, "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+bool   show441Input      = input.bool(false,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+float  level441Input     = input.float(4.414,  "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+color  color441Input     = input.color(BLACK,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
+bool   show461Input      = input.bool(false,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+float  level461Input     = input.float(4.618,  "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+color  color461Input     = input.color(BLACK, "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+bool   show476Input      = input.bool(false,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+float  level476Input     = input.float(4.764,  "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+color  color476Input     = input.color(BLACK,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
+bool   useFillInput      = input.bool(false,    "Background",                group = GRP2, inline = "32", group="/// FIB LEVELS ///")
+int    bgTranspInput     = input.int(90,       "",                          group = GRP2, inline = "32", group="/// FIB LEVELS ///")
+bool   invertFibInput    = input.bool(false,   "Reverse",                   group = GRP2, group="/// FIB LEVELS ///")
+bool   useLogScaleInput  = input.bool(false,   "Log scale Fibs",            group = GRP2, group="/// FIB LEVELS ///")
+
+string GRP3              = "Labels"
+bool   showPricesInput   = input.bool(true,    "Prices",                    group = GRP3, group="/// FIB LEVELS ///")
+bool   showLevelsInput   = input.bool(true,    "Levels",                    group = GRP3, inline = "40", group="/// FIB LEVELS ///")
+string levelTypeInput    = input.string(LV01,  "",                          group = GRP3, inline = "40", options = [LV01, LV02], group="/// FIB LEVELS ///")
+string labelXInput       = input.string(LB03,  "Fib Labels",                group = GRP3, inline = "41", options = [LB01, LB02, LB03], group="/// FIB LEVELS ///")
+string labelYInput       = input.string(LB05,  "",                          group = GRP3, inline = "41", options = [LB04, LB05, LB06], group="/// FIB LEVELS ///")
+string labelSizeInput    = input.string(SZ03,  "",                          group = GRP3, inline = "41", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS ///")
+bool   tLabelsInput      = input.bool(false,    "Time Labels",               group = GRP3, inline = "42", group="/// FIB LEVELS ///")
+string tLabelSizeInput   = input.string(SZ03,  "",                          group = GRP3, inline = "42", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS ///")
+//#endregion
+
+
+
+//#region ———————————————————— User-defined Types
+
+
+// @type                A coordinate in price and time.   
+// @field y             A value on the Y axis (price).     
+// @field x             A value on the X axis (time). 
+type point 
+    float y
+    int   x 
+
+
+// @type                A level of significance used to determine directional movement or potential support and resistance.
+// @field start         The coordinate of the previous `pivotPoint`.
+// @field end           The coordinate of the current `pivotPoint`.
+// @field dir           Direction of movement of the `pivotPoint`. A value of 1 is used for an upward direction, -1 for downward. 
+// @field ln            A line object connecting the `start` to the `end`. 
+// @field bars          Number of bars in the pivot. Default is 0 bars. 
+type pivotPoint
+    point start
+    point end
+    int   dir
+    line  ln
+    int   bars = 0
+
+
+// @type                Horizontal levels that indicate possible support and resistance where price could potentially reverse direction.
+// @field level         A Fibonacci ratio as a decimal. 
+// @field fibColor      A color for the lines and labels.
+// @field fibLine       A line object for the main fib level. 
+// @field extLine       A line object for the fib level that is extended from the last pivot to the last bar. 
+// @field fibLabel      A label to display the `level` at the `fibLine`.
+type fibLevel
+    float level
+    color fibColor
+    line  fibLine
+    line  extLine 
+    label fibLabel
+//#endregion
+
+
+
+//#region ———————————————————— Global Variables
+
+// Arrays for lines, labels, and colors. 
+var array<float>    levels      = array.new<float>()
+var array<fibLevel> fibLevels   = array.new<fibLevel>()
+var array<int>      sortedArray = array.new<int>()
+
+// Set line extension type.
+string extendExt = extendRightInput ? extend.right : extend.none
+string extendFib = switch
+    not extendRtInput and extendLeftInput and extendRightInput => extend.both 
+    not extendRtInput and extendRightInput => extend.right
+    extendLeftInput => extend.left 
+    => extend.none
+
+// Label display conditions.
+bool   showLabels  = showPricesInput or showLevelsInput
+bool   showPercent = levelTypeInput == LV02
+string labelStyle  = switch 
+    labelYInput == LB04 and labelXInput == LB01 => label.style_label_lower_right
+    labelYInput == LB05 and labelXInput == LB01 => label.style_label_right
+    labelYInput == LB06 and labelXInput == LB01 => label.style_label_upper_right
+    labelYInput == LB04 and labelXInput == LB02 => label.style_label_down
+    labelYInput == LB05 and labelXInput == LB02 => label.style_label_center
+    labelYInput == LB06 and labelXInput == LB02 => label.style_label_up
+    labelYInput == LB04 and labelXInput == LB03 => label.style_label_lower_left 
+    labelYInput == LB05 and labelXInput == LB03 => label.style_label_left 
+    labelYInput == LB06 and labelXInput == LB03 => label.style_label_upper_left 
+
+// Determine display type. 
+bool useZigZag = fibTypeInput == FT02
+//#endregion
+
+
+
+//#region ———————————————————— Functions 
+
+
+// @function            Converts a value from exponential to logarithmic form.
+// @param value         (series float) The value to convert to log. 
+// @returns             (float) The log value. 
+toLog(series float value) =>
+    float exponent = math.abs(value)
+    float product  = math.log10(exponent + 0.0001) + 4
+    float result   = exponent < 1e-8 ? 0 : value < 0 ? - product : product
+    
+
+// @function            Converts a value from logarithmic to exponential form.
+// @param value         (series float) The value to convert from log.
+// @returns             (float) The exponential value. 
+fromLog(series float value) =>
+    float exponent = math.abs(value)
+    float product  = math.pow(10, exponent - 4) - 0.0001
+    float result   = exponent < 1e-8 ? 0 : value < 0 ? - product : product
+
+
+// @function            Determines a fib price based on the chart's high and low price dependant on if the fib retracement is bullish or bearish. Converts to log scale when dictated by user-selection.  
+// @param value         (series float) Fib level in decimal form. 
+// @param hiPrice       (series float) Retracement high. 
+// @param loPrice       (series float) Retracement low. 
+// @param isBull        (series bool) Condition determining if the retracement is bullish. 
+// @returns             (float) The fib price. 
+getPrice(series float value, series float hiPrice, series float loPrice, series bool isBull) =>
+    float hiPoint  = useLogScaleInput ? toLog(hiPrice) : hiPrice
+    float loPoint  = useLogScaleInput ? toLog(loPrice) : loPrice
+    float fibPrice = 
+     isBull and invertFibInput or not isBull and not invertFibInput ? 
+     loPoint + ((hiPoint - loPoint) * value) : 
+     hiPoint - ((hiPoint - loPoint) * value)
+    float result = useLogScaleInput ? fromLog(fibPrice) : fibPrice
+
+
+// @function            Determines a line style based on a user defined input string matching one of the `TY*` constants. 
+// @param styleString   (series string) Input string. 
+// @returns             (string) A string in `line.style*` format. 
+lineStyle(simple string styleString) =>
+    string result = switch styleString
+        TY01 => line.style_solid
+        TY02 => line.style_dashed
+        TY03 => line.style_dotted
+
+
+// @function            Populates global arrays with a `fibLevel` object and fib value when the corresponding input condition is selected. 
+// @param condition     (simple bool) Condition to determine if the fib level is to be displayed. 
+// @param value         (simple float) Value of the user-defined fib level. 
+// @param color         (series color) Color for the fib line and label. 
+// @returns             (void) Function has no return.  
+populate(simple bool condition, simple float value, series color color) => 
+    if condition
+        fibLevel fib = fibLevel.new(value, color)
+        fib.fibLine      := line.new(na, na, na, na, xloc.bar_time, extendFib, color, lineStyle(fibStyleInput), levelsWidthInput)
+        if extendRtInput
+            fib.extLine  := line.new(na, na, na, na, xloc.bar_time, extendExt, color, lineStyle(extStyleInput), levelsWidthInput)
+        if showLabels
+            fib.fibLabel := label.new(na, na, "",    xloc.bar_time, yloc.price, color(na), labelStyle, color, labelSizeInput)
+        array.push(levels, value)
+        array.push(fibLevels, fib)
+
+
+// @function            Sets a linefill object between each fibLevel object. 
+// @returns             (void) Function has no return. 
+setBg() =>
+    line temp1 = na
+    line temp2 = na
+    for sortedIndex in sortedArray
+        fibLevel fib = array.get(fibLevels, sortedIndex)
+        color fillColor = color.new(fib.fibColor, bgTranspInput)
+        if not na(temp1)
+            linefill.new(temp1, fib.fibLine, fillColor)
+            if extendRtInput
+                linefill.new(temp2, fib.extLine, fillColor)
+        temp1 := fib.fibLine
+        temp2 := fib.extLine
+
+
+// @function            Determines a string for use within a fib label. The text will contain the fib price/percent and/or the fib level dependant on user selections for "Prices" and "Levels".
+// @param value         (series float) The fib level from one of the `level*Input` user selections. 
+// @param price         (series float) The corresponding price level for the fib level. 
+// @returns             (string) A string containing the fib `value` and/or the fib `price`. 
+labelText(series float value, series float price) =>
+    string levelString = showPercent ? str.tostring(value * 100, format.percent) : str.format("{0, number, #.###}", value)
+    string result = switch 
+        showPricesInput and showLevelsInput => str.format("{0}({1})", levelString, str.tostring(price, format.mintick))
+        showPricesInput                     => str.format("({0})", str.tostring(price, format.mintick))
+        showLevelsInput                     => levelString
+
+
+// @function            Determines a X time coordinate in UNIX time for fib labels dependant on the user's location selection of "Labels", and the `LB*` constants. 
+// @returns             (int) A time for fib labels. 
+labelTime(series int leftTime, series int rightTime) =>
+    int result = switch labelXInput
+        LB01 => leftTime
+        LB02 => int(math.avg(leftTime, extendRtInput ? chart.right_visible_bar_time : rightTime))
+        LB03 => extendRtInput ? chart.right_visible_bar_time : rightTime
+
+
+// @function            Produces a label with the formatted time and price for the point it is placed. Continues to update the location and text on each bar. 
+// @param x             (series int) Bar UNIX time of the label position. 
+// @param y             (series float) Price of the label position.
+// @param color         (simple color) Color for the text and label.  
+// @param style         (series string) Label style. Accepts one of the `label.style_*` built-in constants. 
+// @returns             (void) Function has no return. 
+timeLabel(series int x, series float y, simple color color, series string style) =>
+    var label timeLabel = label.new(na, na, na, xloc.bar_time, yloc.price, color.new(color, 80), style, color, tLabelSizeInput)
+    label.set_xy(timeLabel, x, y)
+    label.set_text(timeLabel, str.format("{0}\n{1,time, dd/MM/yy @ HH:mm:ss}", str.tostring(y, format.mintick), x))
+
+
+// @function            Produces a line object that sets it's bar time and price on each bar.
+// @param x1            (series int) bar UNIX time of the first point of the line.
+// @param y1            (series float) Price of the first point of the line.
+// @param x2            (series int) bar UNIX time of the second point of the line.
+// @param y2            (series float) Price of the second point of the line.
+// @returns             (void) Function has no return. 
+hiLoLine(series int x1, series float y1, series int x2, series float y2) =>
+    var line hiLoLine = line.new(na, na, na, na, xloc.bar_time, extend.none, trendColorInput, lineStyle(trendStyleInput), trendWidthInput)
+    line.set_xy1(hiLoLine, x1, y1)
+    line.set_xy2(hiLoLine, x2, y2)
+
+
+// @function            Updates price and time of `fibLevel`s and label text. 
+// @param leftTime      (series int) bar UNIX time of the first point of the fib retracement.
+// @param rightTime     (series int) bar UNIX time of the second point of the fib retracement.
+// @param hiPrice       (series float) Price of the high point of the fib retracement.
+// @param loPrice       (series float) Price of the low point of the fib retracement.
+// @param isBull        (series bool) Condition to determine if the retracement is bullish. 
+// @returns             (void) Function has no return. 
+setLevels(series int leftTime, series int rightTime, series float hiPrice, series float loPrice, series bool isBull) =>
+    int labelTime = labelTime(leftTime, rightTime)
+    for fib in fibLevels
+        float fibPrice = getPrice(fib.level, hiPrice, loPrice, isBull)
+        line.set_xy1(fib.fibLine, leftTime,  fibPrice)
+        line.set_xy2(fib.fibLine, rightTime, fibPrice)
+        if extendRtInput
+            line.set_xy1(fib.extLine, rightTime, fibPrice)
+            line.set_xy2(fib.extLine, chart.right_visible_bar_time, fibPrice)
+        if showLabels
+            label.set_xy(fib.fibLabel, labelTime, fibPrice)
+            label.set_text(fib.fibLabel, labelText(fib.level, fibPrice))
+
+
+// @function            Adds a `value` to the begining of the `id` array, while removing from the end of the array if the array size exceeds the `max` size. 
+// @param id            (any array type) An array object.
+// @param max           (simple int) The maximum size of the array. 
+// @param value         (series <type of the array's elements>) The value to add to the start of the array.
+// @returns             (void) Function has no return. 
+addToArray(id, simple int max, value) =>  
+    array.unshift(id, value)   
+    if array.size(id) > max
+        array.pop(id)
+
+
+// @function            Creates and adds a new "pivotPoint" object to the `pivotArray` when a change in `dir` is detected. Sets a line between the new and previous pivot points when "show zigzag" is enabled.             
+// @param length        (simple int) Number of bars to search for a "pivotPoint".
+// @param pivotArray    (array<pivotPoint>) An array of "pivotPoints". 
+// @param addPivots     (simple bool) Condition to search for additonal pivots, Adds a pivot in the opposite direction if a pivot is not found in `length` bars. Default is true. 
+// @returns             (void) Function has no return.     
+addPivot(simple int length, array<pivotPoint> pivotArray, simple bool addPivots = true) =>
+    pivotPoint piv  = array.get(pivotArray, 0)
+    int   altLen    = math.max(piv.bars, 1)
+    int   hiBar     = ta.highestbars(length)
+    int   loBar     = ta.lowestbars(length)
+    int   altHiBar  = ta.highestbars(altLen)
+    int   altLoBar  = ta.lowestbars(altLen)
+    float altHi     = ta.highest(altLen)
+    float altLo     = ta.lowest(altLen)
+    bool  missedPiv = piv.bars >= length and addPivots and not (hiBar == 0 and high > piv.end.y or loBar == 0 and low < piv.end.y) 
+    var int dir = na
+    dir := switch
+        missedPiv => nz(dir, altHiBar < altLoBar ? 1 : -1) * -1
+        hiBar + loBar == 0 => dir * -1 
+        hiBar == 0 =>  1 
+        loBar == 0 => -1 
+        => dir
+    if dir != dir[1] and time <= chart.right_visible_bar_time
+        [hiLo, altHiLo, offset, lineColor] = switch
+            dir > 0 => [high, altHi, altHiBar, zzBullColorInput] 
+            =>         [low,  altLo, altLoBar, zzBearColorInput] 
+        [pivY, bars] = switch
+            missedPiv => [altHiLo, math.abs(offset)]
+            =>           [hiLo, 0]
+        point newPoint   = point.new(pivY, time[bars])
+        pivotPoint pivot = pivotPoint.new(piv.end, newPoint, dir, bars = bars) 
+        if showZZInput and time >= chart.left_visible_bar_time
+            pivot.ln := line.new(piv.end.x, piv.end.y, time[bars], pivY, 
+              xloc.bar_time, extend.none, lineColor, lineStyle(zzStyleInput), zzwidthInput)
+        addToArray(pivotArray, math.max(3, pivotInput + 1), pivot)
+
+
+// @function            Updates the price and time of the developing "pivotPoint" if the latest calculated "point" exceeds the last committed value.
+// @param length        (simple int) Number of bars to search for a "pivotPoint".
+// @param pivotArray    (array<pivotPoint>) An array of "pivotPoints". 
+// @returns             (void) Function has no return. 
+updatePivot(simple int length, array<pivotPoint> pivotArray) =>
+    if time <= chart.right_visible_bar_time
+        pivotPoint piv = array.get(pivotArray, 0)
+        int   dir  = piv.dir 
+        float hiLo = dir > 0 ? high : low
+        piv.bars  += 1
+        if hiLo * dir > piv.end.y * dir 
+            piv.end.y := hiLo
+            piv.end.x := time
+            piv.bars  := 0
+            if showZZInput and time >= chart.left_visible_bar_time
+                if na(piv.ln) 
+                    color lineColor = dir > 0 ? zzBullColorInput : zzBearColorInput
+                    piv.ln := line.new(piv.start.x, piv.start.y, time, hiLo, 
+                     xloc.bar_time, extend.none, lineColor, lineStyle(zzStyleInput), zzwidthInput)
+            line.set_xy2(piv.ln, time, hiLo)
+
+
+// @function            Calculates Zig Zag based on pivots formed over the lookback `length`. 
+// @param length        (simple int) Number of bars to search for a "pivotPoint".
+// @param addPivots     (simple bool) Condition to search for additonal pivots, Adds a pivot in the opposite direction if a pivot is not found in `length` bars. Default is true. 
+// @returns             (array<pivotPoint>) An array of "pivotPoint" objects.      
+zigZag(simple int length, simple bool addPivots = true) =>
+    var array<pivotPoint> pivots = array.new<pivotPoint>(1, pivotPoint.new(point.new(close), point.new(close)))
+    updatePivot(length, pivots)
+    addPivot(length, pivots, addPivots)
+    pivots
+
+
+// @function            Renders a start "point" and end "point" for the `nthPivot` back in the visible range when "Use zig zag" is enabled, and returns the 2 coordinates as a tuple. 
+// @param nthPivot      (simple int) The nth pivot. 
+// @returns             ([int, float, int, float]) The start point time, the start point price, the end point time, the end point price. 
+findHiLo(simple int nthPivot) => 
+    int   leftX  = na  
+    float leftY  = na  
+    int   rightX = na  
+    float rightY = na  
+    if useZigZag
+        array<pivotPoint> pivotArray = zigZag(lengthInput, addPivotInput)
+        if barstate.islast 
+            pivotPoint pivot = array.get(pivotArray, nthPivot)
+            leftX  := pivot.start.x  
+            leftY  := pivot.start.y  
+            rightX := pivot.end.x
+            rightY := pivot.end.y
+            if showZZInput
+                line.set_style(pivot.ln, lineStyle(trendStyleInput))
+    [leftX, leftY, rightX, rightY]
+//#endregion
+
+
+
+//#region ———————————————————— Calculations 
+
+
+// Determine pivot points when "use zig zag" is enabled. 
+[leftX, leftY, rightX, rightY] = findHiLo(pivotInput)
+
+
+// Fib high and low values and their time x-coordinate. 
+bool  zzBull    = leftY < rightY
+float chartHigh = useZigZag ? math.max(leftY,   rightY) : chart.high()
+float chartLow  = useZigZag ? math.min(leftY,   rightY) : chart.low()
+int   hiTime    = useZigZag ? zzBull ? rightX : leftX   : chart.highBarTime()
+int   loTime    = useZigZag ? zzBull ? leftX  : rightX  : chart.lowBarTime()
+bool  isBull    = useZigZag ? zzBull : loTime < hiTime
+int   leftTime  = math.min(hiTime, loTime)
+int   rightTime = math.max(hiTime, loTime)
+
+// Determine label style for time labels. 
+string hiTimeStyle = isBull ? label.style_label_lower_right : label.style_label_lower_left
+string loTimeStyle = isBull ? label.style_label_upper_left  : label.style_label_upper_right
+
+// Create fibLevel objects on first bar, populate levels array, create sortedArray for object sorting. 
+if barstate.isfirst
+    populate(show000Input, level000Input, color000Input)
+    populate(show236Input, level236Input, color236Input)
+    populate(show382Input, level382Input, color382Input)
+    populate(show500Input, level500Input, color500Input)
+    populate(show618Input, level618Input, color618Input)
+    populate(show786Input, level786Input, color786Input)
+    populate(show100Input, level100Input, color100Input)
+    populate(show161Input, level161Input, color161Input)
+    populate(show261Input, level261Input, color261Input)
+    populate(show361Input, level361Input, color361Input)
+    populate(show423Input, level423Input, color423Input)
+    populate(show127Input, level127Input, color127Input)
+    populate(show141Input, level141Input, color141Input)
+    populate(show227Input, level227Input, color227Input)
+    populate(show241Input, level241Input, color241Input)
+    populate(show200Input, level200Input, color200Input)
+    populate(show300Input, level300Input, color300Input)
+    populate(show327Input, level327Input, color327Input)
+    populate(show341Input, level341Input, color341Input)
+    populate(show400Input, level400Input, color400Input)
+    populate(show427Input, level427Input, color427Input)
+    populate(show441Input, level441Input, color441Input)
+    populate(show461Input, level461Input, color461Input)
+    populate(show476Input, level476Input, color476Input)
+    sortedArray := array.sort_indices(levels)
+    if useFillInput
+        setBg()
+
+// Set fibLevel properties on last bar. Draw time labels and hi/lo line. 
+if barstate.islast
+    setLevels(leftTime, rightTime, chartHigh, chartLow, isBull)
+    if tLabelsInput
+        timeLabel(hiTime, chartHigh, LIME,    hiTimeStyle)
+        timeLabel(loTime, chartLow,  FUCHSIA, loTimeStyle)
+    if trendLineInput and not (showZZInput and useZigZag)
+        hiLoLine(hiTime, chartHigh, loTime, chartLow)
+//#endregion
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (fib levels)                                                 ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
@@ -101,94 +668,6 @@ bgcolor(show_sunday and day == sunday ? c_sunday : na, title="Sunday-Pazar")
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
 // ║     main finish (market day)                                                 ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (fib levels)                                                  ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-FPeriod = input(120, title='Period: Modify to adjust.', group="/// FIBONACCI LEVELS ///")
-plotF0 = input(title='Ver retroceso 0%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF236 = input(title='Show 23,6%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF382 = input(title='Show 38,2%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF500 = input(title='Show 50,0%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF618 = input(title='Show 61,8%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF786 = input(title='Show 78,6%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF1000 = input(title='Show 100%', defval=true, group="/// FIBONACCI LEVELS ///")
-plotF1618 = input(title='Show 161.8%', defval=true, group="/// FIBONACCI LEVELS ///")
-
-plotF027 = input(title="Show -0.27%", defval=true, group="/// FIBONACCI LEVELS ///")
-plotF062 = input(title="Show -0.62%", defval=true, group="/// FIBONACCI LEVELS ///")
-plotF1002 = input(title="Show -100%", defval=true, group="/// FIBONACCI LEVELS ///")
-plotF889 = input(title="Show -8.89%", defval=true, group="/// FIBONACCI LEVELS ///")
-plotF502 = input(title="Show -50.0%", defval=true, group="/// FIBONACCI LEVELS ///")
-
-Fhigh = ta.highest(FPeriod)
-Flow = ta.lowest(FPeriod)
-FH = ta.highestbars(high, FPeriod)
-FL = ta.lowestbars(low, FPeriod)
-downfibo = FH < FL
-
-FTIO = downfibo ? (Fhigh - Flow) * 1.10 + Flow : Fhigh - (Fhigh - Flow) * 1.10
-//plotshape(FTIO,style=shape.labeldown,location=location.absolute,size= size.auto,color=black,textcolor=white,show_last=1,text="www.tiomercado.com",offset = 15,transp=10)
-
-F0 = downfibo ? Flow : Fhigh
-F236 = downfibo ? (Fhigh - Flow) * 0.236 + Flow : Fhigh - (Fhigh - Flow) * 0.236
-F382 = downfibo ? (Fhigh - Flow) * 0.382 + Flow : Fhigh - (Fhigh - Flow) * 0.382
-F500 = downfibo ? (Fhigh - Flow) * 0.500 + Flow : Fhigh - (Fhigh - Flow) * 0.500
-F618 = downfibo ? (Fhigh - Flow) * 0.618 + Flow : Fhigh - (Fhigh - Flow) * 0.618
-F786 = downfibo ? (Fhigh - Flow) * 0.786 + Flow : Fhigh - (Fhigh - Flow) * 0.786
-F1000 = downfibo ? (Fhigh - Flow) * 1.000 + Flow : Fhigh - (Fhigh - Flow) * 1.000
-F1618 = downfibo ? (Fhigh - Flow) * 1.618 + Flow : Fhigh - (Fhigh - Flow) * 1.618
-
-F027 = downfibo ? (Fhigh - Flow) * -0.270 + Flow : Fhigh - (Fhigh - Flow) * -0.270
-F062 = downfibo ? (Fhigh - Flow) * -0.620 + Flow : Fhigh - (Fhigh - Flow) * -0.620
-F1002 = downfibo ? (Fhigh - Flow) * -1.000 + Flow : Fhigh - (Fhigh - Flow) * -1.000
-F889 = downfibo ? (Fhigh - Flow) * -0.889 + Flow : Fhigh - (Fhigh - Flow) * -0.889
-F502 = downfibo ? (Fhigh - Flow) * -0.500 + Flow : Fhigh - (Fhigh - Flow) * -0.500
-
-Fcolor = downfibo ? #001380 : #0f0d0d
-Foffset = downfibo ? FH : FL
-
-plot(plotF0 and F0 ? F0 : na, color=color.new(#757575, 0), linewidth=1, trackprice=true, show_last=1, title='0%')
-plot(plotF236 and F236 ? F236 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='23.6%', transp=0)
-plot(plotF382 and F382 ? F382 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='38.2%', transp=0)
-plot(plotF500 and F500 ? F500 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='50.0%', transp=0)
-plot(plotF618 and F618 ? F618 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='61.8%', transp=0)
-plot(plotF786 and F786 ? F786 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='78.6%', transp=0)
-plot(plotF1000 and F1000 ? F1000 : na, color=color.new(#757575, 0), linewidth=1, trackprice=true, show_last=1, title='100%')
-plot(plotF1618 and F1618 ? F1618 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='161.8%', transp=0)
-
-plot(plotF027 and F027 ? F027 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='-0.27%', transp=0)
-plot(plotF062 and F062 ? F062 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='-0.62%', transp=0)
-plot(plotF1002 and F1002 ? F1002 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='-100%', transp=0)
-plot(plotF889 and F889 ? F889 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='-8.89%', transp=0)
-plot(plotF502 and F502 ? F502 : na, color=Fcolor, linewidth=1, trackprice=true, show_last=1, title='-50.0%', transp=0)
-
-plotshape(plotF0 and F0 ? F0 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text='0', offset=50)
-plotshape(plotF236 and F236 ? F236 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 23.6% ', offset=50)
-plotshape(plotF382 and F382 ? F382 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 38.2% ', offset=50)
-plotshape(plotF500 and F500 ? F500 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 50.0% ', offset=50)
-plotshape(plotF618 and F618 ? F618 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 61.8% ', offset=50)
-plotshape(plotF786 and F786 ? F786 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 78.6% ', offset=50)
-plotshape(plotF1000 and F1000 ? F1000 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' 1 ', offset=50)
-plotshape(plotF1618 and F1618 ? F1618 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text='161.8%', offset=50, transp=30)
-
-plotshape(plotF027 and F027 ? F027 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' -0.27% ', offset=50)
-plotshape(plotF062 and F062 ? F062 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' -0.62% ', offset=50)
-plotshape(plotF1002 and F1002 ? F1002 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' -100% ', offset=50)
-plotshape(plotF889 and F889 ? F889 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' -8.89% ', offset=50)
-plotshape(plotF502 and F502 ? F502 : na, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 100), textcolor=color.new(color.black, 10), show_last=1, text=' -50.0% ', offset=50)
-
-plotshape(Flow, style=shape.labelup, location=location.absolute, size=size.auto, color=color.new(#cccaca, 0), textcolor=color.new(color.black, 0), show_last=1, text='Min', offset=FL)
-plotshape(Fhigh, style=shape.labeldown, location=location.absolute, size=size.auto, color=color.new(#cccaca, 0), textcolor=color.new(color.black, 0), show_last=1, text='Max', offset=FH)
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (fib levels)                                                  ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
@@ -346,7 +825,7 @@ if barstate.isconfirmed
 
 displayStyle = input.string(defval='Standard', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display', group="/// KEY LEVELS ///")
 mergebool = input.bool(defval=true, title='Merge Levels?', inline='Display', group="/// KEY LEVELS ///")
-distanceright = input.int(defval=200, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+distanceright = input.int(defval=250, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
 radistance = input.int(defval=25, title='Anchor Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
 labelsize = input.string(defval='Medium', title='Text Size', options=['Small', 'Medium', 'Large'], group="/// KEY LEVELS ///")
 linesize = input.string(defval='Small', title='Line Width', options=['Small', 'Medium', 'Large'], inline='Line', group="/// KEY LEVELS ///")
