@@ -1,15 +1,15 @@
+//©HYPEUPGRADETR (based multible sources, modified and optimised by HYPEUPGRADETR)
 //@version=5
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║ DayofWeek                                                                    ║
-// ║ Market sessions                                                              ║
-// ║ Key Levels                                                                   ║
-// ║ RSI Candles                                                                  ║
-// ║ Dynamic Imbalance                                                            ║
+// ║ WVAP	                                                                      ║
+// ║ RSI Candle                                                                   ║
+// ║ Imbalance                                                                    ║
 // ║                                                                              ║
 // ║ developer : HYPEUPGRADETR                                                    ║
-// ║ creators  : HYPEUPGRADETR, By Leviathan, SpacemanBTC, crypto_kai, glaz       ║
+// ║ creators  : HYPEUPGRADETR													  ║
+// ║                                                                              ║
 // ║                                                                              ║
 // ║ This source code is subject to the terms of the Mozilla Public License 2.0   ║
 // ║ at https://mozilla.org/MPL/2.0/                                              ║
@@ -25,27 +25,27 @@
 
 
 // v3 Style Gradient
-GRN01 = #7CFC00, GRN02 = #32CD32, GRN03 = #228B22, GRN04 = #006400, GRN05 = #008000, GRN06=#093507
-RED01 = #FF4500, RED02 = #FF0000, RED03 = #B22222, RED04 = #8B0000, RED05 = #800000, RED06=#330d06
+// GRN01 = #7CFC00, GRN02 = #32CD32, GRN03 = #228B22, GRN04 = #006400, GRN05 = #008000, GRN06=#093507
+// RED01 = #FF4500, RED02 = #FF0000, RED03 = #B22222, RED04 = #8B0000, RED05 = #800000, RED06=#330d06
 
 // ──────────[ v3 Style Colors ]
-AQUA    = #00FFFF
-BLACK   = #000000
-BLUE    = #0000FF
-FUCHSIA = #FF00FF
-GRAY    = #808080
-GREEN   = #008000
-LIME    = #00FF00
-MAROON  = #800000
-NAVY    = #000080
-OLIVE   = #808000
-ORANGE  = #FF7F00
-PURPLE  = #800080
-RUBI    = #FF0000
-SILVER  = #C0C0C0
-TEAL    = #008080
-YELLOW  = #FFFF00
-WHITE   = #FFFFFF
+// AQUA    = #00FFFF
+// BLACK   = #000000
+// BLUE    = #0000FF
+// FUCHSIA = #FF00FF
+// GRAY    = #808080
+// GREEN   = #008000
+// LIME    = #00FF00
+// MAROON  = #800000
+// NAVY    = #000080
+// OLIVE   = #808000
+// ORANGE  = #FF7F00
+// PURPLE  = #800080
+// RUBI    = #FF0000
+// SILVER  = #C0C0C0
+// TEAL    = #008080
+// YELLOW  = #FFFF00
+// WHITE   = #FFFFFF
 
 // ╔══════════════════════════════════════╗
 // ║                                      ║
@@ -53,503 +53,144 @@ WHITE   = #FFFFFF
 // ║                                      ║
 // ╚══════════════════════════════════════╝
 
-
-indicator('HYPEUPGRADETR 5', overlay=true, max_boxes_count=500, max_bars_back=1000, max_lines_count=500)
-//indicator("Market sessions and Volume profile - By Leviathan", overlay=true, max_boxes_count=500, max_bars_back=1000)
-//indicator(title='RSI Chart Bars', overlay=true, shorttitle='RSI Bars')
-//indicator('Imbalance Finder Dynamic', overlay=true, max_lines_count=500, max_boxes_count=500)
-//indicator('Key Levels SpacemanBTC IDWM', shorttitle='SpacemanBTC Key Level V13.1', overlay=true, max_lines_count=100)
-
+indicator(title="HYPEUPGRADETR 8", overlay=true, max_labels_count=500, max_lines_count=500, max_boxes_count=500)
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (market day)                                                  ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-show_monday = input.bool(false, "Monday-Pazartesi", group="/// MARKET GÜNLERİ ///")
-show_tuesday = input.bool(false, "Tuesday-Salı", group="/// MARKET GÜNLERİ ///")
-show_wednesday = input.bool(false, "Wednesday-Çarşamba", group="/// MARKET GÜNLERİ ///")
-show_thursday = input.bool(false, "Thursday-Perşembe", group="/// MARKET GÜNLERİ ///")
-show_friday = input.bool(false, "Friday-Cuma", group="/// MARKET GÜNLERİ ///")
-show_saturday = input.bool(true, "Saturday-Cumartesi", group="/// MARKET GÜNLERİ ///")
-show_sunday = input.bool(true, "Sunday-Pazar", group="/// MARKET GÜNLERİ ///")
-transp = input.int(85, "Transp", minval=0, maxval=100, group="/// MARKET GÜNLERİ ///")
-
-c_monday = color.new(color.red, transp)
-c_tuesday = color.new(color.orange, transp)
-c_wednesday = color.new(color.yellow, transp)
-c_thursday = color.new(color.green, transp)
-c_friday = color.new(color.aqua, transp)
-c_saturday = color.new(color.blue, transp)
-c_sunday = color.new(color.purple, transp)
-
-day = dayofweek
-monday = dayofweek.monday
-tuesday = dayofweek.tuesday
-wednesday = dayofweek.wednesday
-thursday = dayofweek.thursday
-friday = dayofweek.friday
-saturday = dayofweek.saturday
-sunday = dayofweek.sunday
-bgcolor(show_monday and day == monday ? c_monday : na, title="Monday-Pazartesi")
-bgcolor(show_tuesday and day == tuesday ? c_tuesday : na, title="Tuesday-Salı")
-bgcolor(show_wednesday and day == wednesday ? c_wednesday : na, title="Wednesday-Çarşamba")
-bgcolor(show_thursday and day == thursday ? c_thursday : na, title="Thursday-Perşembe")
-bgcolor(show_friday and day == friday ? c_friday : na, title="Friday-Cuma")
-bgcolor(show_saturday and day == saturday ? c_saturday : na, title="Saturday-Cumartesi")
-bgcolor(show_sunday and day == sunday ? c_sunday : na, title="Sunday-Pazar")
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (market day)                                                 ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main start (market sessions)                                             ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-//==========================
-//Inputs
-//==========================
-sessionType = input.string('Daily', 'Session Type', options=['Tokyo','London','New York','Daily','Weekly', 'Monthly', 'Quarterly', 'Yearly'], group="/// MARKET SEANSLARI ///")
-
-showProf = input.bool(false, 'Show Volume Profile', group='/// MARKET SEANSLARI ///')
-showSbox = input.bool(false, 'Show Session Box', group='/// MARKET SEANSLARI ///')
-showPoc = input.bool(true, 'Show POC', group='/// MARKET SEANSLARI ///')
-showVA = input.bool(true, 'Show VAH and VAL', group='/// MARKET SEANSLARI ///')
-showVAb = input.bool(false, 'Show Value Area Box', group='/// MARKET SEANSLARI ///')
-showCur = input.bool(false, 'Show Live Zone', group='/// MARKET SEANSLARI ///')
-showLabels = input.bool(true, 'Show Session Lables', group='/// MARKET SEANSLARI ///')
-showFx = input.bool(false, 'Show Forex Sessions (no profile)', group='/// MARKET SEANSLARI ///')
-resolution = input.int(30, 'Resolution', minval=5, tooltip='The higher the value, the more refined of a profile, but less profiles shown on chart', group='Volume Profile Settings')
-VAwid = input.int(70, 'Value Area Volume %', minval=1, maxval=100, group='Volume Profile Settings')
-dispMode = input.string('Mode 2', 'Bar Mode', ['Mode 1', 'Mode 2', 'Mode 3'], group='Volume Profile Settings')
-volType = input.string('Volume', 'Profile Data Type', options=['Volume', 'Open Interest'], group='Volume Profile Settings')
-smoothVol = input.bool(false, 'Smooth Volume Data', tooltip='Useful for assets that have very large spikes in volume over large bars - helps create better profiles', group='Volume Profile Settings')
-dataTf = ''
-
-bullCol = input.color(color.rgb(76, 175, 79, 50), 'Up Volume', group='Appearance')
-bearCol = input.color(color.rgb(255, 82, 82, 50), 'Down Volume', group='Appearance')
-VAbCol = input.color(color.rgb(107, 159, 255, 90), 'Value Area Box', group='Appearance' )
-pocCol = input.color(color.red, 'POC', inline='p', group='Appearance')
-pocWid = input.int(2, 'Thickness', inline='p', group='Appearance')
-vahCol = input.color(color.aqua, 'VAH', inline='h', group='Appearance')
-vahWid = input.int(1, 'Thickness', inline='h', group='Appearance')
-valCol = input.color(color.aqua, 'VAL', inline='l', group='Appearance')
-valWid = input.int(1, 'Thickness', inline='l', group='Appearance')
-boxBg = input.color(color.rgb(255, 153, 0, 100), 'Box', inline='m', group='Appearance')
-boxWid = input.int(1, 'Thickness', inline='m', group='Appearance')
-
-//==========================
-//Constants / Variable Declaration
-//==========================
-var int zoneStart = 0
-var int tokyoStart = 0
-var int londonStart = 0
-var int nyStart = 0
-int lookback = bar_index - zoneStart
-var activeZone = false
-
-// Defining arrays that store the information
-var vpGreen = array.new_float(resolution, 0) // Sum of volume on long bars
-var vpRed = array.new_float(resolution, 0) // Same thing but with red bars
-var zoneBounds = array.new_float(resolution, 0) // array that stores the highest value that can be in a zone
-
-//Values to store current intra bar data
-var float[] ltfOpen =  array.new_float(0)
-var float[] ltfClose =  array.new_float(0)
-var float[] ltfHigh =  array.new_float(0)
-var float[] ltfLow =  array.new_float(0)
-var float[] ltfVolume = array.new_float(0)
-
-//Getting OI Data
-string userSymbol = syminfo.prefix + ":" + syminfo.ticker
-string openInterestTicker = str.format("{0}_OI", userSymbol)
-string timeframe = syminfo.type == "futures" and timeframe.isintraday ? "1D" : timeframe.period
-deltaOi = request.security(openInterestTicker, timeframe, close-close[1], ignore_invalid_symbol = true)
-
-//Selecting what vol type to use
-vol() =>
-    out = smoothVol ? ta.ema(volume, 5) : volume
-    if volType == 'Open Interest'
-        out := deltaOi
-    out
-
-//Getting intrabar intial data
-[dO, dC, dH, dL, dV] = request.security_lower_tf(syminfo.tickerid, dataTf, [open, close, high, low, vol()])
-
-//==========================
-//Functions
-//==========================
-resetProfile(enable) =>
-    if enable
-        array.fill(vpGreen, 0)
-        array.fill(vpRed, 0)
-        array.clear(ltfOpen)
-        array.clear(ltfHigh)
-        array.clear(ltfLow)
-        array.clear(ltfClose)
-        array.clear(ltfVolume)
-
-profHigh = ta.highest(high, lookback+1)[1]
-profLow = ta.lowest(low, lookback+1)[1]
-
-tr = ta.atr(1)
-atr = ta.atr(14)
-
-get_vol(y11, y12, y21, y22, height, vol) =>
-    nz(math.max(math.min(math.max(y11, y12), math.max(y21, y22)) - math.max(math.min(y11, y12), math.min(y21, y22)), 0) * vol / height)
-
-profileAdd(o, h, l, c, v, g, w) =>
-    //Array to store how much to distribute in each zone, on scale of 1 for full gap size to 0
-    zoneDist = array.new_float(resolution, 0)
-    distSum = 0.0
-    // Going over each zone
-    for i = 0 to array.size(vpGreen) - 1
-        // Checking to see if cur bar is in zone
-        zoneTop = array.get(zoneBounds, i)
-        zoneBot = zoneTop - g
-
-        body_top = math.max(c, o)
-        body_bot = math.min(c, o)
-        itsgreen = c >= o
-
-        topwick = h - body_top
-        bottomwick = body_bot - l
-        body = body_top - body_bot
-
-        bodyvol = body * v / (2 * topwick + 2 * bottomwick + body)
-        topwickvol = 2 * topwick * v / (2 * topwick + 2 * bottomwick + body)
-        bottomwickvol = 2 * bottomwick * v / (2 * topwick + 2 * bottomwick + body)
-
-        if volType == 'Volume'
-            array.set(vpGreen, i, array.get(vpGreen, i) + (itsgreen ? get_vol(zoneBot, zoneTop, body_bot, body_top, body, bodyvol) : 0) + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-            array.set(vpRed, i, array.get(vpRed, i) + (itsgreen ? 0 : get_vol(zoneBot, zoneTop, body_bot, body_top, body, bodyvol)) + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-        else if volType == 'Open Interest'
-            if v > 0
-                array.set(vpGreen, i, array.get(vpGreen, i) + get_vol(zoneBot, zoneTop, body_bot, body_top, body, v))// + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-            if v < 0
-                array.set(vpRed, i, array.get(vpRed, i) + get_vol(zoneBot, zoneTop, body_bot, body_top, body, -v))// + get_vol(zoneBot, zoneTop, body_top, h, topwick, topwickvol) / 2 + get_vol(zoneBot, zoneTop, body_bot, l, bottomwick, bottomwickvol) / 2)
-
-calcSession(update) =>
-    array.fill(vpGreen, 0)
-    array.fill(vpRed, 0)
-    if bar_index > lookback and update
-        gap = (profHigh - profLow) / resolution
-
-        // Defining profile bounds
-        for i = 0 to resolution - 1
-            array.set(zoneBounds, i, profHigh - gap * i)
-
-        // Putting each bar inside zone into the volume profile array
-        if array.size(ltfOpen) > 0
-            for j = 0 to array.size(ltfOpen) - 1
-                profileAdd(array.get(ltfOpen, j), array.get(ltfHigh, j), array.get(ltfLow, j), array.get(ltfClose, j), array.get(ltfVolume, j), gap, 1)
-
-pocLevel() =>
-    float maxVol = 0
-    int levelInd = 0
-    for i = 0 to array.size(vpRed) - 1
-        if array.get(vpRed, i) + array.get(vpGreen, i) > maxVol
-            maxVol := array.get(vpRed, i) + array.get(vpGreen, i)
-            levelInd := i
-
-    float outLevel = na
-    if levelInd != array.size(vpRed) - 1
-        outLevel := array.get(zoneBounds, levelInd) - (array.get(zoneBounds, levelInd) - array.get(zoneBounds, levelInd+1)) / 2
-    outLevel
-
-valueLevels(poc) =>
-    float gap = (profHigh - profLow) / resolution
-    float volSum = array.sum(vpRed) + array.sum(vpGreen)
-    float volCnt = 0
-
-    float vah = profHigh
-    float val = profLow
-
-    //Finding poc index
-    int pocInd = 0
-    for i = 0 to array.size(zoneBounds)-2
-        if array.get(zoneBounds, i) >= poc and array.get(zoneBounds, i + 1) < poc
-            pocInd := i
-
-    volCnt += (array.get(vpRed, pocInd) + array.get(vpGreen, pocInd))
-    for i = 1 to array.size(vpRed)
-        if pocInd + i >= 0 and pocInd + i < array.size(vpRed)
-            volCnt += (array.get(vpRed, pocInd + i) + array.get(vpGreen, pocInd + i))
-            if volCnt >= volSum * (VAwid/100)
-                break
-            else
-                val := array.get(zoneBounds, pocInd + i) - gap
-        if pocInd - i >= 0 and pocInd - i < array.size(vpRed)
-            volCnt += (array.get(vpRed, pocInd - i) + array.get(vpGreen, pocInd - i))
-            if volCnt >= volSum * (VAwid/100)
-                break
-            else
-                vah := array.get(zoneBounds, pocInd - i)
-
-    [val, vah]
-
-drawNewZone(update) =>
-    if bar_index > lookback and update and array.sum(vpGreen) + array.sum(vpRed) > 0
-        gap = (profHigh - profLow) / resolution
-        float leftMax = bar_index[lookback]
-        float rightMax = bar_index[int(lookback / 1.4)]
-        float rightMaxVol = array.max(vpGreen)+array.max(vpRed)
-        float buffer = gap / 10
-        if showLabels
-            label.new((bar_index - 1 + int(leftMax))/2, profHigh, sessionType, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-        if showProf
-            for i = 0 to array.size(vpRed) - 1
-                greenEnd = int(leftMax + (rightMax - leftMax) * (array.get(vpGreen, i) / rightMaxVol))
-                redEnd = int(greenEnd + (rightMax - leftMax) * (array.get(vpRed, i) / rightMaxVol))
-                if dispMode == 'Mode 2'
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                    box.new(greenEnd, array.get(zoneBounds, i) - buffer, redEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0)
-                else if dispMode == 'Mode 1'
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                else
-                    box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0)
-                    box.new(int(leftMax)-redEnd+greenEnd, array.get(zoneBounds, i) - buffer, int(leftMax), array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0)
-
-        box.new(int(leftMax), profHigh, bar_index-1, profLow, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-        poc = pocLevel()
-        [val, vah] = valueLevels(poc)
-        if showPoc
-            line.new(int(leftMax), poc, bar_index-1, poc, color=pocCol, width=pocWid)
-        if showVA
-            line.new(int(leftMax), vah, bar_index-1, vah, color=vahCol, width=vahWid)
-            line.new(int(leftMax), val, bar_index-1, val, color=valCol, width=valWid)
-        if showVAb
-            box.new(int(leftMax), vah, bar_index-1, val, border_color=color.rgb(54, 58, 69, 100), bgcolor=VAbCol)
-
-
-    //if update
-    //    resetProfile(true)
-
-drawCurZone(update, delete) =>
-    var line pocLine = na
-    var line vahLine = na
-    var line valLine = na
-    var box outBox = na
-    var label sessionLab = na
-
-    var redBoxes = array.new_box(array.size(vpRed), na)
-    var greenBoxes = array.new_box(array.size(vpRed), na)
-
-    if bar_index > lookback and update and array.sum(vpGreen) + array.sum(vpRed) > 0
-        //Clearing the previous boxes and array
-        if not na(pocLine)
-            line.delete(pocLine)
-        if not na(vahLine)
-            line.delete(vahLine)
-        if not na(valLine)
-            line.delete(valLine)
-        if not na(outBox)
-            box.delete(outBox)
-        if not na(sessionLab)
-            label.delete(sessionLab)
-
-        for i = 0 to array.size(redBoxes) - 1
-            if not na(array.get(redBoxes, i))
-                box.delete(array.get(redBoxes, i))
-                box.delete(array.get(greenBoxes, i))
-
-
-        gap = (profHigh - profLow) / resolution
-        float leftMax = bar_index[lookback]
-        float rightMax = bar_index[int(lookback / 1.4)]
-        float rightMaxVol = array.max(vpGreen)+array.max(vpRed)
-        float buffer = gap / 10
-        if showLabels
-            sessionLab := label.new((bar_index - 1 + int(leftMax))/2, profHigh, sessionType, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-        if showProf
-            for i = 0 to array.size(vpRed) - 1
-                greenEnd = int(leftMax + (rightMax - leftMax) * (array.get(vpGreen, i) / rightMaxVol))
-                redEnd = int(greenEnd + (rightMax - leftMax) * (array.get(vpRed, i) / rightMaxVol))
-                if dispMode == 'Mode 2'
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                    array.set(redBoxes, i, box.new(greenEnd, array.get(zoneBounds, i) - buffer, redEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0))
-                else if dispMode == 'Mode 1'
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                else
-                    array.set(greenBoxes, i, box.new(int(leftMax), array.get(zoneBounds, i) - buffer, greenEnd, array.get(zoneBounds, i) - gap + buffer, bgcolor=bullCol, border_width=0))
-                    array.set(redBoxes, i, box.new(int(leftMax)-redEnd+greenEnd, array.get(zoneBounds, i) - buffer, int(leftMax), array.get(zoneBounds, i) - gap + buffer, bgcolor=bearCol, border_width=0))
-
-        outBox := box.new(int(leftMax), profHigh, bar_index-1, profLow, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-
-
-        poc = pocLevel()
-        [val, vah] = valueLevels(poc)
-        if showPoc
-            line.delete(pocLine)
-            pocLine := line.new(int(leftMax), poc, bar_index-1, poc, color=pocCol, width=pocWid)
-        if showVA
-            line.delete(vahLine)
-            line.delete(valLine)
-            vahLine := line.new(int(leftMax), vah, bar_index-1, vah, color=vahCol, width=vahWid)
-            valLine := line.new(int(leftMax), val, bar_index-1, val, color=valCol, width=valWid)
-        if showVAb
-            box.new(int(leftMax), vah, bar_index-1, val, border_color=color.rgb(54, 58, 69, 100), bgcolor=VAbCol)
-
-    if delete
-        box.delete(outBox)
-        line.delete(pocLine)
-        line.delete(vahLine)
-        line.delete(valLine)
-        for i = 0 to array.size(greenBoxes)-1
-            box.delete(array.get(greenBoxes, i))
-        for i = 0 to array.size(redBoxes)-1
-            box.delete(array.get(redBoxes, i))
-
-drawForexBox(startBar, title, top, bottom) =>
-    box.new(int(startBar), top, bar_index-1, bottom, chart.fg_color, boxWid, line.style_dashed, bgcolor=boxBg)
-    if showLabels
-        label.new((bar_index - 1 + int(startBar))/2, top, title, color=color.rgb(0,0,0,100), textcolor=chart.fg_color)
-
-
-combArray(arr1, arr2) =>
-    out = array.copy(arr1)
-    if array.size(arr2) > 0
-        for i = 0 to array.size(arr2) - 1
-            array.push(out, array.get(arr2, i))
-    out
-
-updateIntra(o, h, l, c, v) =>
-    if array.size(o) > 0
-        for i = 0 to array.size(o) - 1
-            array.push(ltfOpen, array.get(o, i))
-            array.push(ltfHigh,array.get(h, i))
-            array.push(ltfLow,array.get(l, i))
-            array.push(ltfClose,array.get(c, i))
-            array.push(ltfVolume,array.get(v, i))
-
-
-//==========================
-//Calculations
-//==========================
-//Detecting different start dates
-newDaily = dayofweek != dayofweek[1]
-newWeekly = weekofyear != weekofyear[1]
-newMonthly = (dayofmonth != dayofmonth[1] + 1) and (dayofmonth != dayofmonth[1])
-newYearly = year != year[1]
-newQuarterly = month != month[1] and (month - 1) % 3 == 0
-
-utcHour = hour(time(timeframe.period, '0000-2400', 'GMT'), 'GMT')
-
-newTokyo = utcHour != utcHour[1] + 1 and utcHour != utcHour[1]
-endTokyo = utcHour >= 9 and utcHour[1] < 9
-
-newLondon = utcHour >= 7 and utcHour[1] < 7
-endLondon = utcHour >= 16 and utcHour[1] < 16
-
-newNewYork = utcHour >= 13 and utcHour[1] < 13
-endNewYork = utcHour >= 22 and utcHour[1] < 22
-
-newSession = switch sessionType
-    'Tokyo' => newTokyo
-    'London' => newLondon
-    'New York' => newNewYork
-    'Daily' => newDaily
-    'Weekly' => newWeekly
-    'Monthly' => newMonthly
-    'Yearly' => newYearly
-    'Quarterly' => newQuarterly
-    => newDaily
-
-zoneEnd = switch sessionType
-    'Tokyo' => endTokyo
-    'London' => endLondon
-    'New York' => endNewYork
-    'Daily' => newDaily
-    'Weekly' => newWeekly
-    'Monthly' => newMonthly
-    'Yearly' => newYearly
-    'Quarterly' => newQuarterly
-    => newDaily
-
-isForex = showFx
-
-//Re calculating and drawing zones
-calcSession(zoneEnd or (barstate.islast and showCur))
-drawNewZone(zoneEnd)
-drawCurZone(barstate.islast and not zoneEnd and showCur and activeZone, zoneEnd)
-
-//Reseting profie at start of new zone
-resetProfile(newSession)
-
-//Updating data arrays
-updateIntra(dO, dH, dL, dC, dV)
-
-//Reseting zone start value
-if zoneEnd
-    activeZone := false
-
-if newSession
-    zoneStart := bar_index
-    activeZone := true
-
-if newLondon
-    londonStart := bar_index
-if newTokyo
-    tokyoStart := bar_index
-if newNewYork
-    nyStart := bar_index
-
-londonHigh = ta.highest(high, bar_index-londonStart+1)
-tokyoHigh = ta.highest(high, bar_index-tokyoStart+1)
-nyHigh = ta.highest(high, bar_index-nyStart+1)
-
-londonLow = ta.lowest(low, bar_index-londonStart+1)
-tokyoLow = ta.lowest(low, bar_index-tokyoStart+1)
-nyLow = ta.lowest(low, bar_index-nyStart+1)
-
-if endLondon and isForex
-    drawForexBox(londonStart, 'London', londonHigh, londonLow)
-if endNewYork and isForex
-    drawForexBox(nyStart, 'New York', nyHigh, nyLow)
-if endTokyo and isForex
-    drawForexBox(tokyoStart, 'Tokyo', tokyoHigh, tokyoLow)
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (market sessions)                                            ║
+// ║     main start (vwap)                                                        ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//% Price Change by [OrganicPunch]
+//
+// To visually evaluate the % change in price between two candles
+
+pc_ema_lenght = input.int(7, title="Price Change EMA", minval=1)
+pc_display_toggle = input.bool(false, "Two-side display")
+pc_price_increase = (close - close[1]) / close[1] * 100
+pc_price_decrease = (close[1] - close) / close * 100
+pc_price_up = close > close[1] 
+pc_price_change = pc_price_up ? pc_price_increase : pc_price_decrease
+pc_price_change2 = pc_price_up ? pc_price_increase : -pc_price_decrease
+pc_price_toggle = pc_display_toggle ? pc_price_change2 : pc_price_change
+pc_color = pc_price_up ? color(color.green) : color(color.red)
+pc_ema = ta.ema(pc_price_toggle, pc_ema_lenght)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Volume Weighted Average Price
+hideonDWM = input(false, title="Hide VWAP on 1D or Above", group="VWAP Settings")
+var anchor = input.string(defval = "Month", title="Anchor Period", options=["Percent Change", "Extreme", "Low", "High", "Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group="VWAP Settings")
+src = input(title = "Source", defval = hlc3, group="VWAP Settings")
+offset = input(0, title="Offset", group="VWAP Settings")
+
+lookback = input(100, "Lookback length for High and Low", group = "Extra Settings")
+check_percent = input(1.00, "Threshhold for price Percent Change", group = "Extra Settings")
+
+showBand_1 = input(false, title="", group="Standard Deviation Bands Settings", inline="band_1")
+stdevMult_1 = input(1.0, title="Bands Multiplier #1", group="Standard Deviation Bands Settings", inline="band_1")
+showBand_2 = input(false, title="", group="Standard Deviation Bands Settings", inline="band_2")
+stdevMult_2 = input(2.0, title="Bands Multiplier #2", group="Standard Deviation Bands Settings", inline="band_2")
+showBand_3 = input(true, title="", group="Standard Deviation Bands Settings", inline="band_3")
+stdevMult_3 = input(3.0, title="Bands Multiplier #3", group="Standard Deviation Bands Settings", inline="band_3")
+
+if barstate.islast and ta.cum(volume) == 0
+    runtime.error("No volume is provided by the data vendor.")
+
+new_earnings = request.earnings(syminfo.tickerid, earnings.actual, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_dividends = request.dividends(syminfo.tickerid, dividends.gross, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_split = request.splits(syminfo.tickerid, splits.denominator, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+
+var float lowest_number = high
+var float highest_number = low
+
+if ta.change(dayofmonth) and dayofweek == dayofweek.saturday
+    lowest_number := high
+    highest_number:= low
+
+high_check = ta.highest(high, lookback)
+low_check = ta.lowest(low, lookback)
+if low_check < lowest_number
+    lowest_number := low_check
+
+if high_check > highest_number
+    highest_number := high_check
+
+bool new_low = na
+bool new_high = na
+bool new_extreme = na
+bool new_percent = na
+
+if (ta.change(lowest_number))
+    new_low := true
+
+if (ta.change(highest_number))
+    new_high := true
+
+if (new_high or new_low)
+    new_extreme := true
+
+if (pc_price_toggle > 1.00)
+    new_percent := true
+
+isNewPeriod = switch anchor
+    "Percent Change"   => not na(new_percent)
+    "Extreme"   => not na(new_extreme)
+    "Low"       => not na(new_low)
+    "High"      => not na(new_high) 
+	"Earnings"  => not na(new_earnings)
+	"Dividends" => not na(new_dividends)
+	"Splits"    => not na(new_split)
+	"Session"   => timeframe.change("D")
+	"Week"      => timeframe.change("W")
+	"Month"     => timeframe.change("M")
+	"Quarter"   => timeframe.change("3M")
+	"Year"      => timeframe.change("12M")
+	"Decade"    => timeframe.change("12M") and year % 10 == 0
+	"Century"   => timeframe.change("12M") and year % 100 == 0
+	=> false
+
+isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits"
+if na(src[1]) and not isEsdAnchor
+	isNewPeriod := true
+
+float vwapValue = na
+float upperBandValue1 = na
+float lowerBandValue1 = na
+float upperBandValue2 = na
+float lowerBandValue2 = na
+float upperBandValue3 = na
+float lowerBandValue3 = na
+
+if not (hideonDWM and timeframe.isdwm)
+    [_vwap, _stdevUpper, _] = ta.vwap(src, isNewPeriod, 1)
+	vwapValue := _vwap
+    stdevAbs = _stdevUpper - _vwap
+	upperBandValue1 := _vwap + stdevAbs * stdevMult_1
+	lowerBandValue1 := _vwap - stdevAbs * stdevMult_1
+	upperBandValue2 := _vwap + stdevAbs * stdevMult_2
+	lowerBandValue2 := _vwap - stdevAbs * stdevMult_2
+	upperBandValue3 := _vwap + stdevAbs * stdevMult_3
+	lowerBandValue3 := _vwap - stdevAbs * stdevMult_3
+
+plot(vwapValue, title="VWAP", color=#4caf50, offset=offset)
+
+upperBand_1 = plot(upperBandValue1, title="Upper Band #1", color=color.green, offset=offset, display = showBand_1 ? display.all : display.none)
+lowerBand_1 = plot(lowerBandValue1, title="Lower Band #1", color=color.green, offset=offset, display = showBand_1 ? display.all : display.none)
+fill(upperBand_1, lowerBand_1, title="Bands Fill #1", color= color.new(color.green, 95)    , display = showBand_1 ? display.all : display.none)
+
+upperBand_2 = plot(upperBandValue2, title="Upper Band #2", color=color.olive, offset=offset, display = showBand_2 ? display.all : display.none)
+lowerBand_2 = plot(lowerBandValue2, title="Lower Band #2", color=color.olive, offset=offset, display = showBand_2 ? display.all : display.none)
+fill(upperBand_2, lowerBand_2, title="Bands Fill #2", color= color.new(color.olive, 95)    , display = showBand_2 ? display.all : display.none)
+
+upperBand_3 = plot(upperBandValue3, title="Upper Band #3", color=color.red, offset=offset, display = showBand_3 ? display.all : display.none)
+lowerBand_3 = plot(lowerBandValue3, title="Lower Band #3", color=#0066ff, offset=offset, display = showBand_3 ? display.all : display.none)
+fill( upperBand_3, lowerBand_3, title="Bands Fill #3", color= color.new(color.teal, 95)    , display = showBand_3 ? display.all : display.none)
+
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (rsi candle)                                                  ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-src = close
-len = input.int(14, minval=1, title='Length')
-up = ta.rma(math.max(ta.change(src), 0), len)
-down = ta.rma(-math.min(ta.change(src), 0), len)
-rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - 100 / (1 + up / down)
-
-//coloring method below
-
-src1 = close
-len1 = input.int(70, minval=1, title='UpLevel')
-src2 = close
-len2 = input.int(30, minval=1, title='DownLevel')
-isup() =>
-    rsi > len1
-isdown() =>
-    rsi < len2
-isdown_1 = isdown()
-barcolor(isup() ? color.yellow : isdown_1 ? color.yellow : na)
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (rsi candle)                                                 ║
+// ║     main finish (vwap)                                                       ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
@@ -558,6 +199,7 @@ barcolor(isup() ? color.yellow : isdown_1 ? color.yellow : na)
 // ║     main start (dynamic imbalance)                                           ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
+
 
 var box[]   top_boxes     = array.new_box()
 var box[]   bottom_boxes     = array.new_box()
@@ -598,8 +240,8 @@ if barstate.isconfirmed
             if imb_extend
                 box.set_right(tbox, bar_index)
             if high > top
-                box.set_bgcolor(tbox, Imbcol_tested)
-                if imb_extend
+                box.set_bgcolor(tbox, Imbcol_tested)  
+                if imb_extend 
                     box.set_right(tbox, ago+1)
                 array.remove(top_boxes, i)
                 continue
@@ -620,8 +262,8 @@ if barstate.isconfirmed
                 if not matched
                     BOX3 = box.copy(tbox)
                     box.set_top(BOX3, high)
-                    box.set_bgcolor(BOX3, Imbcol_tested)
-                    if imb_extend
+                    box.set_bgcolor(BOX3, Imbcol_tested) 
+                    if imb_extend  
                         box.set_right(BOX3, ago+1)
                     array.push(tested_obs, BOX3)
                     box.set_bottom(tbox, high)
@@ -634,10 +276,10 @@ if barstate.isconfirmed
             ago = box.get_left(tbox)
             if imb_extend
                 box.set_right(tbox, bar_index)
-            if low < bottom
-                box.set_bgcolor(tbox, Imbcol_tested)
+            if low < bottom 
+                box.set_bgcolor(tbox, Imbcol_tested) 
                 if imb_extend
-                    box.set_right(tbox, ago+1)
+                    box.set_right(tbox, ago+1)  
                 array.remove(bottom_boxes, i)
                 continue
             if low < top //and ago < 5000
@@ -655,9 +297,9 @@ if barstate.isconfirmed
                 if not matched
                     BOX4 = box.copy(tbox)
                     box.set_bottom(BOX4, low)
-                    box.set_bgcolor(BOX4, Imbcol_tested)
+                    box.set_bgcolor(BOX4, Imbcol_tested)  
                     if imb_extend
-                        box.set_right(BOX4, ago+1)
+                        box.set_right(BOX4, ago+1) 
                     array.push(tested_obs, BOX4)
                     box.set_top(tbox, low)
 
@@ -674,19 +316,17 @@ if barstate.isconfirmed
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-displayStyle = input.string(defval='Standard', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display')
-mergebool = input.bool(defval=true, title='Merge Levels?', inline='Display')
-distanceright = input.int(defval=15, title='Distance', minval=5, maxval=500, inline='Dist')
-radistance = input.int(defval=25, title='Anchor Distance', minval=5, maxval=500, inline='Dist')
-labelsize = input.string(defval='Medium', title='Text Size', options=['Small', 'Medium', 'Large'])
-linesize = input.string(defval='Small', title='Line Width', options=['Small', 'Medium', 'Large'], inline='Line')
-linestyle = input.string(defval='Solid', title='Line Style', options=['Solid', 'Dashed', 'Dotted'], inline='Line')
+displayStyle = input.string(defval='Standard', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display', group="/// KEY LEVELS ///")
+mergebool = input.bool(defval=true, title='Merge Levels?', inline='Display', group="/// KEY LEVELS ///")
+distanceright = input.int(defval=100, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+radistance = input.int(defval=25, title='Anchor Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+labelsize = input.string(defval='Medium', title='Text Size', options=['Small', 'Medium', 'Large'], group="/// KEY LEVELS ///")
+linesize = input.string(defval='Small', title='Line Width', options=['Small', 'Medium', 'Large'], inline='Line', group="/// KEY LEVELS ///")
+linestyle = input.string(defval='Solid', title='Line Style', options=['Solid', 'Dashed', 'Dotted'], inline='Line', group="/// KEY LEVELS ///")
 
-
-
-GlobalTextType = input.bool(defval=true, title='Global Text ShortHand', tooltip='Enable for shorthand text on all text')
-var globalcoloring = input.bool(defval=false, title='Global Coloring', tooltip='Enable for all color controls via one color', inline='GC')
-GlobalColor = input.color(title='', defval=color.white, inline='GC')
+GlobalTextType = input.bool(defval=false, title='Global Text ShortHand', tooltip='Enable for shorthand text on all text', group="/// KEY LEVELS ///")
+var globalcoloring = input.bool(defval=false, title='Global Coloring', tooltip='Enable for all color controls via one color', inline='GC', group="/// KEY LEVELS ///")
+GlobalColor = input.color(title='', defval=color.rgb(0, 0, 0), inline='GC', group="/// KEY LEVELS ///")
 //var show_tails = input(defval = false, title = "Always Show", type = input.bool)
 
 
@@ -726,8 +366,6 @@ var monday_low = low
 
 //------------------------------ Inputs -------------------------------
 
-
-
 var is_intra_enabled = input.bool(defval=false, title='Open', group='4H', inline='4H')
 var is_intrarange_enabled = input.bool(defval=false, title='Prev H/L', group='4H', inline='4H')
 var is_intram_enabled = input.bool(defval=false, title='Prev Mid', group='4H', inline='4H')
@@ -744,7 +382,7 @@ var untested_monday = false
 MondayTextType = input.bool(defval=false, title='ShortHand', group='Monday Range', inline='Mondaysh')
 
 var is_weekly_enabled = input.bool(defval=false, title='Open', group='Weekly', inline='Weekly')
-var is_weeklyrange_enabled = input.bool(defval=false, title='Prev H/L', group='Weekly', inline='Weekly')
+var is_weeklyrange_enabled = input.bool(defval=true, title='Prev H/L', group='Weekly', inline='Weekly')
 var is_weekly_mid = input.bool(defval=false, title='Prev Mid', group='Weekly', inline='Weekly')
 WeeklyTextType = input.bool(defval=false, title='ShortHand', group='Weekly', inline='Weeklysh')
 
@@ -768,41 +406,40 @@ var is_usrange_enabled = input.bool(defval=false, title='New York Range', group=
 var is_asiarange_enabled = input.bool(defval=false, title='Asia Range', group='FX Sessions', inline='FX')
 SessionTextType = input.bool(defval=false, title='ShortHand', group='FX Sessions', inline='FXColor')
 
-
-
 Londont = input.session("0800-1600", "London Session")
 USt = input.session("1400-2100", "New York Session")
 Asiat = input.session("0000-0900", "Tokyo Session")
 
 DailyColor = input.color(title='', defval=#000000, group='Daily', inline='Dailysh')
-MondayColor = input.color(title='', defval=#000000, group='Monday Range', inline='Mondaysh')
+MondayColor = input.color(title='', defval=#2962ff, group='Monday Range', inline='Mondaysh')
 WeeklyColor = input.color(title='', defval=#000000, group='Weekly', inline='Weeklysh')
-MonthlyColor = input.color(title='', defval=#f23645, group='Monthly', inline='Monthlysh')
-YearlyColor = input.color(title='', defval=color.red, group='Yearly', inline='Yearlysh')
-quarterlyColor = input.color(title='', defval=#FF9800, group='Quarterly', inline='Quarterlysh')
-IntraColor = input.color(title='', defval=color.orange, group='4H', inline='4Hsh')
-LondonColor = input.color(title='', defval=color.white, group='FX Sessions', inline='FXColor')
-USColor = input.color(title='', defval=color.white, group='FX Sessions', inline='FXColor')
-AsiaColor = input.color(title='', defval=color.white, group='FX Sessions', inline='FXColor')
-var pdhtext = GlobalTextType or DailyTextType ? 'PDH' : 'Prev Day High'
-var pdltext = GlobalTextType or DailyTextType ? 'PDL' : 'Prev Day Low'
+MonthlyColor = input.color(title='', defval=#000000, group='Monthly', inline='Monthlysh')
+YearlyColor = input.color(title='', defval=#000000, group='Yearly', inline='Yearlysh')
+quarterlyColor = input.color(title='', defval=#000000, group='Quarterly', inline='Quarterlysh')
+IntraColor = input.color(title='', defval=#000000, group='4H', inline='4Hsh')
+LondonColor = input.color(title='', defval=#000000, group='FX Sessions', inline='FXColor')
+USColor = input.color(title='', defval=#000000, group='FX Sessions', inline='FXColor')
+AsiaColor = input.color(title='', defval=#000000, group='FX Sessions', inline='FXColor')
+
+var pdhtext = GlobalTextType or DailyTextType ? 'PDH' : 'Prev Daily High'
+var pdltext = GlobalTextType or DailyTextType ? 'PDL' : 'Prev Daily Low'
 var dotext = GlobalTextType or DailyTextType ? 'DO' : 'Daily Open'
-var pdmtext = GlobalTextType or DailyTextType ? 'PDM' : 'Prev Day Middle'
+var pdmtext = GlobalTextType or DailyTextType ? 'PDM' : 'Prev Daily Middle'
 
-var pwhtext = GlobalTextType or WeeklyTextType ? 'PWH' : 'Prev Week High'
-var pwltext = GlobalTextType or WeeklyTextType ? 'PWL' : 'Prev Week Low'
+var pwhtext = GlobalTextType or WeeklyTextType ? 'PWH' : 'Prev Weekly High'
+var pwltext = GlobalTextType or WeeklyTextType ? 'PWL' : 'Prev Weekly Low'
 var wotext = GlobalTextType or WeeklyTextType ? 'WO' : 'Weekly Open'
-var pwmtext = GlobalTextType or WeeklyTextType ? 'PWM' : 'Prev Week Middle'
+var pwmtext = GlobalTextType or WeeklyTextType ? 'PWM' : 'Prev Weekly Middle'
 
-var pmhtext = GlobalTextType or MonthlyTextType ? 'PMH' : 'Prev Month High'
-var pmltext = GlobalTextType or MonthlyTextType ? 'PML' : 'Prev Month Low'
+var pmhtext = GlobalTextType or MonthlyTextType ? 'PMH' : 'Prev Monthly High'
+var pmltext = GlobalTextType or MonthlyTextType ? 'PML' : 'Prev Monthly Low'
 var motext = GlobalTextType or MonthlyTextType ? 'MO' : 'Monthly Open'
-var pmmtext = GlobalTextType or MonthlyTextType ? 'PMM' : 'Prev Month Mid'
+var pmmtext = GlobalTextType or MonthlyTextType ? 'PMM' : 'Prev Monthly Middle'
 
 var pqhtext = GlobalTextType or QuarterlyTextType ? 'PQH' : 'Prev Quarterly High'
 var pqltext = GlobalTextType or QuarterlyTextType ? 'PQL' : 'Prev Quarterly Low'
 var qotext = GlobalTextType or QuarterlyTextType ? 'QO' : 'Quarterly Open'
-var pqmtext = GlobalTextType or QuarterlyTextType ? 'PQM' : 'Prev Quarterly Mid'
+var pqmtext = GlobalTextType or QuarterlyTextType ? 'PQM' : 'Prev Quarterly Middle'
 
 var cyhtext = GlobalTextType or YearlyTextType ? 'CYH' : 'Yearly High'
 var cyltext = GlobalTextType or YearlyTextType ? 'CYL' : 'Yearly Low'
@@ -812,16 +449,15 @@ var cymtext = GlobalTextType or YearlyTextType ? 'CYM' : 'Yearly Middle'
 var pihtext = GlobalTextType or IntraTextType ? 'P-4H-H' : 'Prev 4h High'
 var piltext = GlobalTextType or IntraTextType ? 'P-4H-L' : 'Prev 4h Low'
 var iotext = GlobalTextType or IntraTextType ? '4H-O' : '4h Open'
-var pimtext = GlobalTextType or IntraTextType ? 'P-4H-M' : 'Prev 4h Middlee'
+var pimtext = GlobalTextType or IntraTextType ? 'P-4H-M' : 'Prev 4h Middle'
 
 var pmonhtext = GlobalTextType or MondayTextType ? 'MDAY-H' : 'Monday High'
 var pmonltext = GlobalTextType or MondayTextType ? 'MDAY-L' : 'Monday Low'
-var pmonmtext = GlobalTextType or MondayTextType ? 'MDAY-M' : 'Monday Mid'
+var pmonmtext = GlobalTextType or MondayTextType ? 'MDAY-M' : 'Monday Middle'
 
 var lhtext = GlobalTextType or SessionTextType ? 'Lon-H' : 'London High'
 var lltext = GlobalTextType or SessionTextType ? 'Lon-L' : 'London Low'
 var lotext = GlobalTextType or SessionTextType ? 'Lon-O' : 'London Open'
-
 
 var ushtext = GlobalTextType or SessionTextType ? 'NY-H' : 'New York High'
 var usltext = GlobalTextType or SessionTextType ? 'NY-L' : 'New York Low'
@@ -1859,7 +1495,6 @@ if barstate.islast
         // we fix the start of the line position on the Prev weekly candle
         if timeframe.isweekly and dayofweek(monthly_time) != dayofweek.monday
             line.set_x1(monthlyLine, monthly_time - (weekly_time - weekly_time[1]))
-
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
