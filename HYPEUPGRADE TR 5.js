@@ -825,7 +825,7 @@ if barstate.isconfirmed
 
 displayStyle = input.string(defval='Standard', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display', group="/// KEY LEVELS ///")
 mergebool = input.bool(defval=true, title='Merge Levels?', inline='Display', group="/// KEY LEVELS ///")
-distanceright = input.int(defval=250, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+distanceright = input.int(defval=125, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
 radistance = input.int(defval=25, title='Anchor Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
 labelsize = input.string(defval='Medium', title='Text Size', options=['Small', 'Medium', 'Large'], group="/// KEY LEVELS ///")
 linesize = input.string(defval='Small', title='Line Width', options=['Small', 'Medium', 'Large'], inline='Line', group="/// KEY LEVELS ///")
@@ -2006,5 +2006,56 @@ if barstate.islast
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
 // ║     main finish (key levels)                                                 ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (project name)                                                ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+table_top_left = 'top_left'
+table_top_center = 'top_center'
+table_top_right = 'top_right'
+table_middle_left = 'middle_left'
+table_middle_center = 'middle_center'
+table_middle_right = 'middle_right'
+table_bottom_left = 'bottom_left'
+table_bottom_center = 'bottom_center'
+table_bottom_right = 'bottom_right'
+
+
+i_border_color = input.color(color.white, title='Border', group='settings', inline='border')
+i_border_width = input.int(0, title='', minval=0, maxval=3, group='settings', inline='border')
+i_table_position = input.string(table_top_right, title='Position', options=[table_top_left, table_top_center, table_top_right, table_middle_left, table_middle_center, table_middle_right, table_bottom_left, table_bottom_center, table_bottom_right], group='settings')
+
+
+table tbl = table.new(i_table_position, columns=1, rows=15, frame_color=i_border_color, frame_width=-1, border_color=i_border_color, border_width=i_border_width)
+
+i_show_1 = input.bool(true, title='', group='Line 1', inline='text1')
+i_color_1 = input.color(color.rgb(0, 0, 0), title='', group='Line 1', inline='text1')
+i_text_1 = input.string('HYPEUPGRADE TR', title='', group='Line 1', inline='text1')
+i_height_1 = input.float(3.5, title='', group='Line 1', inline='text1_2')
+i_size_1 = input.string('large', title='', options=['tiny', 'small', 'normal', 'large', 'auto'], group='Line 1', inline='text1_2')
+i_align_1 = input.string('center', title='', options=['center', 'left', 'right'], group='Line 1', inline='text1_2')
+
+if i_show_1
+    table.cell(tbl, 0, 0, i_text_1, text_size=i_size_1, text_color=i_color_1, height=i_height_1, text_halign=i_align_1)
+
+
+i_show_2 = input.bool(true, title='', group='Line 2', inline='text2')
+i_color_2 = input.color(color.rgb(0, 0, 0), title='', group='Line 2', inline='text2')
+i_text_2 = input.string('Fütüristik Kripto Merkezi', title='', group='Line 2', inline='text2')
+i_height_2 = input.float(3.5, title='', group='Line 2', inline='text2_2')
+i_size_2 = input.string('normal', title='', options=['tiny', 'small', 'normal', 'large', 'auto'], group='Line 2', inline='text2_2')
+i_align_2 = input.string('center', title='', options=['center', 'left', 'right'], group='Line 2', inline='text2_2')
+
+if i_show_2
+    table.cell(tbl, 0, 1, i_text_2, text_size=i_size_2, text_color=i_color_2, height=i_height_2, text_halign=i_align_2)
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (project name)                                               ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
