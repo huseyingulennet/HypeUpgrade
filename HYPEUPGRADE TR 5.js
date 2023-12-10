@@ -53,11 +53,6 @@ RED01 = #FF4500, RED02 = #FF0000, RED03 = #B22222, RED04 = #8B0000, RED05 = #800
 // ╚══════════════════════════════════════╝
 
 indicator('HYPEUPGRADETR 5', overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count = 500)
-//indicator("Market sessions and Volume profile - By Leviathan", overlay=true, max_boxes_count=500, max_bars_back=1000)
-//indicator(title='RSI Chart Bars', overlay=true, shorttitle='RSI Bars')
-//indicator('Imbalance Finder Dynamic', overlay=true, max_lines_count=500, max_boxes_count=500)
-//indicator('Key Levels SpacemanBTC IDWM', shorttitle='SpacemanBTC Key Level V13.1', overlay=true, max_lines_count=100)
-//indicator("Supertrend-Fib", overlay = true, max_lines_count = 500, max_labels_count = 500)
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
@@ -119,117 +114,102 @@ string TT_PL = "Number of bars back to track pivots (ex. Highest point in 50 bar
 string TT_ZA = "Your choices here dictate the Zig Zag line color, line width, and line style."
 string TT_LP = "Places the fib retracement on the nth pivot point back from the last visible pivot."
 
-// Inputs
-string fibTypeInput      = input.string(FT01,  "Fib Calculation Type",      options = [FT01, FT02],      tooltip = TT_FT, group="/// FIB LEVELS ///")
-
-string GRP1              = "Visible ZigZag"
-bool   showZZInput       = input.bool(true,    "Show Zig Zag",              group = GRP1, inline = "00", tooltip = TT_ZZ, group="/// FIB LEVELS ///")
-bool   addPivotInput     = input.bool(true,    "Detect additional pivots",  group = GRP1, inline = "01", tooltip = TT_MP, group="/// FIB LEVELS ///")
-int    lengthInput       = input.int(50,       "   Pivot Length",           group = GRP1, minval = 1,    tooltip = TT_PL, group="/// FIB LEVELS ///")
-color  zzBullColorInput  = input.color(GRAY,   "   ",                       group = GRP1, inline = "02", group="/// FIB LEVELS ///")
-color  zzBearColorInput  = input.color(GRAY,   "",                          group = GRP1, inline = "02", group="/// FIB LEVELS ///")
-int    zzwidthInput      = input.int(2,        "",                          group = GRP1, inline = "02", minval  = 1, group="/// FIB LEVELS ///")
-string zzStyleInput      = input.string(TY01,  "",                          group = GRP1, inline = "02", tooltip = TT_ZA, options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
-int    pivotInput        = input.int(1,        "   nth Last Pivot",         group = GRP1, minval = 0,    tooltip = TT_LP, group="/// FIB LEVELS ///")
 
 string GRP2              = "Fib Levels"
-bool   extendRtInput     = input.bool(true,    "Extend to real time",       group = GRP2, group="/// FIB LEVELS ///")
-bool   extendRightInput  = input.bool(false,   "Extend lines right",        group = GRP2, group="/// FIB LEVELS ///")
-bool   extendLeftInput   = input.bool(false,   "Extend lines left",         group = GRP2, group="/// FIB LEVELS ///")
 bool   trendLineInput    = input.bool(true,    "Trend Line",                group = GRP2, inline = "10", group="/// FIB LEVELS ///")
-color  trendColorInput   = input.color(BLACK,   "",                          group = GRP2, inline = "10", group="/// FIB LEVELS ///")
+color  trendColorInput   = input.color(BLACK,  "",                          group = GRP2, inline = "10", group="/// FIB LEVELS ///")
 int    trendWidthInput   = input.int(1,        "",                          group = GRP2, inline = "10", minval  = 1, group="/// FIB LEVELS ///")
 string trendStyleInput   = input.string(TY02,  "",                          group = GRP2, inline = "10", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
 int    levelsWidthInput  = input.int(1,        "Levels Line",               group = GRP2, inline = "11", minval  = 1, group="/// FIB LEVELS ///")
 string fibStyleInput     = input.string(TY01,  "",                          group = GRP2, inline = "11", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
-string extStyleInput     = input.string(TY02,  "",                          group = GRP2, inline = "11", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
+string extStyleInput     = input.string(TY03,  "",                          group = GRP2, inline = "11", options = [TY01, TY02, TY03], group="/// FIB LEVELS ///")
 bool   show000Input      = input.bool(true,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
 float  level000Input     = input.float(0,      "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
-color  color000Input     = input.color(BLACK,   "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+color  color000Input     = input.color(BLACK,  "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
 bool   show236Input      = input.bool(true,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
 float  level236Input     = input.float(0.236,  "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
-color  color236Input     = input.color(BLACK,    "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
+color  color236Input     = input.color(BLACK,  "",                          group = GRP2, inline = "20", group="/// FIB LEVELS ///")
 bool   show382Input      = input.bool(true,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
 float  level382Input     = input.float(0.382,  "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
-color  color382Input     = input.color(BLACK, "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
+color  color382Input     = input.color(BLACK,  "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
 bool   show500Input      = input.bool(true,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
 float  level500Input     = input.float(0.5,    "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
 color  color500Input     = input.color(BLACK,  "",                          group = GRP2, inline = "21", group="/// FIB LEVELS ///")
 bool   show618Input      = input.bool(true,    "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
 float  level618Input     = input.float(0.618,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
-color  color618Input     = input.color(BLACK,   "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+color  color618Input     = input.color(BLACK,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
 bool   show786Input      = input.bool(true,    "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
 float  level786Input     = input.float(0.786,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
-color  color786Input     = input.color(BLACK,   "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
+color  color786Input     = input.color(BLACK,  "",                          group = GRP2, inline = "22", group="/// FIB LEVELS ///")
 bool   show100Input      = input.bool(true,    "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
 float  level100Input     = input.float(1,      "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
-color  color100Input     = input.color(BLACK,   "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+color  color100Input     = input.color(BLACK,  "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
 bool   show161Input      = input.bool(true,    "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
 float  level161Input     = input.float(0.705,  "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
-color  color161Input     = input.color(BLACK,   "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
+color  color161Input     = input.color(BLACK,  "",                          group = GRP2, inline = "23", group="/// FIB LEVELS ///")
 bool   show261Input      = input.bool(true,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
 float  level261Input     = input.float(-0.27,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
-color  color261Input     = input.color(BLACK,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+color  color261Input     = input.color(BLACK,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
 bool   show361Input      = input.bool(true,    "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
 float  level361Input     = input.float(-0.62,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
-color  color361Input     = input.color(BLACK, "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
+color  color361Input     = input.color(BLACK,  "",                          group = GRP2, inline = "24", group="/// FIB LEVELS ///")
 bool   show423Input      = input.bool(true,    "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
-float  level423Input     = input.float(-1,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
-color  color423Input     = input.color(BLACK,   "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
-bool   show127Input      = input.bool(true,   "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+float  level423Input     = input.float(-1,     "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+color  color423Input     = input.color(BLACK,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+bool   show127Input      = input.bool(true,    "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
 float  level127Input     = input.float(0.889,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
-color  color127Input     = input.color(BLACK, "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
-bool   show141Input      = input.bool(true,   "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
-float  level141Input     = input.float(-0.5,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
-color  color141Input     = input.color(BLACK,    "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+color  color127Input     = input.color(BLACK,  "",                          group = GRP2, inline = "25", group="/// FIB LEVELS ///")
+bool   show141Input      = input.bool(true,    "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+float  level141Input     = input.float(-0.5,   "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+color  color141Input     = input.color(BLACK,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
 bool   show227Input      = input.bool(false,   "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
 float  level227Input     = input.float(2.272,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
-color  color227Input     = input.color(BLACK, "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
+color  color227Input     = input.color(BLACK,  "",                          group = GRP2, inline = "26", group="/// FIB LEVELS ///")
 bool   show241Input      = input.bool(false,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
 float  level241Input     = input.float(2.414,  "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
 color  color241Input     = input.color(BLACK,  "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
 bool   show200Input      = input.bool(false,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
 float  level200Input     = input.float(2,      "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
-color  color200Input     = input.color(BLACK,   "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
+color  color200Input     = input.color(BLACK,  "",                          group = GRP2, inline = "27", group="/// FIB LEVELS ///")
 bool   show300Input      = input.bool(false,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
 float  level300Input     = input.float(3,      "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
-color  color300Input     = input.color(BLACK,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+color  color300Input     = input.color(BLACK,  "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
 bool   show327Input      = input.bool(false,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
 float  level327Input     = input.float(3.272,  "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
-color  color327Input     = input.color(BLACK,   "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
-bool   show341Input      = input.bool(false,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-float  level341Input     = input.float(3.414,  "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-color  color341Input     = input.color(BLACK,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-bool   show400Input      = input.bool(false,   "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-float  level400Input     = input.float(4,      "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-color  color400Input     = input.color(BLACK,    "",                          group = GRP2, inline = "29", group="/// FIB LEVELS ///")
-bool   show427Input      = input.bool(false,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-float  level427Input     = input.float(4.272,  "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-color  color427Input     = input.color(BLACK, "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-bool   show441Input      = input.bool(false,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-float  level441Input     = input.float(4.414,  "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-color  color441Input     = input.color(BLACK,   "",                          group = GRP2, inline = "30", group="/// FIB LEVELS ///")
-bool   show461Input      = input.bool(false,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-float  level461Input     = input.float(4.618,  "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-color  color461Input     = input.color(BLACK, "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-bool   show476Input      = input.bool(false,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-float  level476Input     = input.float(4.764,  "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-color  color476Input     = input.color(BLACK,   "",                          group = GRP2, inline = "31", group="/// FIB LEVELS ///")
-bool   useFillInput      = input.bool(false,    "Background",                group = GRP2, inline = "32", group="/// FIB LEVELS ///")
+color  color327Input     = input.color(BLACK,  "",                          group = GRP2, inline = "28", group="/// FIB LEVELS ///")
+bool   useFillInput      = input.bool(false,   "Background",                group = GRP2, inline = "32", group="/// FIB LEVELS ///")
 int    bgTranspInput     = input.int(90,       "",                          group = GRP2, inline = "32", group="/// FIB LEVELS ///")
 bool   invertFibInput    = input.bool(false,   "Reverse",                   group = GRP2, group="/// FIB LEVELS ///")
 bool   useLogScaleInput  = input.bool(false,   "Log scale Fibs",            group = GRP2, group="/// FIB LEVELS ///")
 
+
+bool   extendRtInput     = input.bool(true,    "Extend to real time",       group = GRP2, group="/// FIB LEVELS UZATMA ///")
+bool   extendRightInput  = input.bool(false,   "Extend lines right",        group = GRP2, group="/// FIB LEVELS UZATMA ///")
+bool   extendLeftInput   = input.bool(false,   "Extend lines left",         group = GRP2, group="/// FIB LEVELS UZATMA ///")
+
 string GRP3              = "Labels"
-bool   showPricesInput   = input.bool(true,    "Prices",                    group = GRP3, group="/// FIB LEVELS ///")
-bool   showLevelsInput   = input.bool(true,    "Levels",                    group = GRP3, inline = "40", group="/// FIB LEVELS ///")
-string levelTypeInput    = input.string(LV01,  "",                          group = GRP3, inline = "40", options = [LV01, LV02], group="/// FIB LEVELS ///")
-string labelXInput       = input.string(LB03,  "Fib Labels",                group = GRP3, inline = "41", options = [LB01, LB02, LB03], group="/// FIB LEVELS ///")
-string labelYInput       = input.string(LB05,  "",                          group = GRP3, inline = "41", options = [LB04, LB05, LB06], group="/// FIB LEVELS ///")
-string labelSizeInput    = input.string(SZ03,  "",                          group = GRP3, inline = "41", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS ///")
-bool   tLabelsInput      = input.bool(false,    "Time Labels",               group = GRP3, inline = "42", group="/// FIB LEVELS ///")
-string tLabelSizeInput   = input.string(SZ03,  "",                          group = GRP3, inline = "42", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS ///")
+bool   showPricesInput   = input.bool(false,    "Prices",                    group = GRP3, group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+bool   showLevelsInput   = input.bool(true,    "Levels",                    group = GRP3, inline = "40", group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+string levelTypeInput    = input.string(LV01,  "",                          group = GRP3, inline = "40", options = [LV01, LV02], group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+string labelXInput       = input.string(LB03,  "Fib Labels",                group = GRP3, inline = "41", options = [LB01, LB02, LB03], group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+string labelYInput       = input.string(LB04,  "",                          group = GRP3, inline = "41", options = [LB04, LB05, LB06], group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+string labelSizeInput    = input.string(SZ02,  "",                          group = GRP3, inline = "41", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+bool   tLabelsInput      = input.bool(false,    "Time Labels",              group = GRP3, inline = "42", group="/// FIB LEVELS METİN EDİTÖRÜ ///")
+string tLabelSizeInput   = input.string(SZ03,  "",                          group = GRP3, inline = "42", options = [SZ01, SZ02, SZ03, SZ04, SZ05], group="/// FIB LEVELS METİN EDİTÖRÜ ///")
 //#endregion
+
+// Inputs
+string fibTypeInput      = input.string(FT01,  "Fib Calculation Type",      options = [FT01, FT02],      tooltip = TT_FT, group="/// FIB LEVELS HESAPLAMA ///")
+
+string GRP1              = "Visible ZigZag"
+bool   showZZInput       = input.bool(true,    "Show Zig Zag",              group = GRP1, inline = "00", tooltip = TT_ZZ, group="/// FIB LEVELS HESAPLAMA ///")
+bool   addPivotInput     = input.bool(true,    "Detect additional pivots",  group = GRP1, inline = "01", tooltip = TT_MP, group="/// FIB LEVELS HESAPLAMA ///")
+int    lengthInput       = input.int(50,       "   Pivot Length",           group = GRP1, minval = 1,    tooltip = TT_PL, group="/// FIB LEVELS HESAPLAMA ///")
+color  zzBullColorInput  = input.color(GRAY,   "   ",                       group = GRP1, inline = "02", group="/// FIB LEVELS HESAPLAMA ///")
+color  zzBearColorInput  = input.color(GRAY,   "",                          group = GRP1, inline = "02", group="/// FIB LEVELS HESAPLAMA ///")
+int    zzwidthInput      = input.int(2,        "",                          group = GRP1, inline = "02", minval  = 1, group="/// FIB LEVELS HESAPLAMA ///")
+string zzStyleInput      = input.string(TY03,  "",                          group = GRP1, inline = "02", tooltip = TT_ZA, options = [TY01, TY02, TY03], group="/// FIB LEVELS HESAPLAMA ///")
+int    pivotInput        = input.int(1,        "   nth Last Pivot",         group = GRP1, minval = 0,    tooltip = TT_LP, group="/// FIB LEVELS HESAPLAMA ///")
 
 
 
@@ -600,12 +580,6 @@ if barstate.isfirst
     populate(show200Input, level200Input, color200Input)
     populate(show300Input, level300Input, color300Input)
     populate(show327Input, level327Input, color327Input)
-    populate(show341Input, level341Input, color341Input)
-    populate(show400Input, level400Input, color400Input)
-    populate(show427Input, level427Input, color427Input)
-    populate(show441Input, level441Input, color441Input)
-    populate(show461Input, level461Input, color461Input)
-    populate(show476Input, level476Input, color476Input)
     sortedArray := array.sort_indices(levels)
     if useFillInput
         setBg()
@@ -639,7 +613,7 @@ show_thursday = input.bool(false, "Thursday-Perşembe", group="/// MARKET DAYS /
 show_friday = input.bool(false, "Friday-Cuma", group="/// MARKET DAYS ///")
 show_saturday = input.bool(true, "Saturday-Cumartesi", group="/// MARKET DAYS ///")
 show_sunday = input.bool(true, "Sunday-Pazar", group="/// MARKET DAYS ///")
-transp = input.int(90, "Transp", minval=0, maxval=100, group="/// MARKET DAYS ///")
+transp = input.int(97, "Transp", minval=0, maxval=100, group="/// MARKET DAYS ///")
 
 c_monday = color.new(color.red, transp)
 c_tuesday = color.new(color.orange, transp)
@@ -704,129 +678,14 @@ barcolor(isup() ? color.yellow : isdown_1 ? color.yellow : na)
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
-// ║     main start (dynamic imbalance)                                           ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-var box[]   top_boxes     = array.new_box()
-var box[]   bottom_boxes     = array.new_box()
-var box[]   tested_obs = array.new_box()
-var bool matched = false
-
-color imb = color.new(#630cff,70)
-color imb_tested = color.new(color.red,60)
-
-tf = timeframe.isdaily ? 1440 : (timeframe.isweekly ? 1440*7 : (timeframe.ismonthly ? 1440*7*30 : 1))
-reqDate = timenow - 199999999*timeframe.multiplier*tf
-Imbcol = input.color(imb, 'Imbalance Color', inline="1" , group="/// DYNAMIC IMBALANCE ///")
-Imbcol_tested = input.color(imb_tested, 'Mitigated Imbalance', inline="2" , group="/// DYNAMIC IMBALANCE ///")
-imb_extend = input.bool(false, "Auto-extend Untested imbalance", group="/// DYNAMIC IMBALANCE ///")
-TopImbalance = low[2] <= open[1] and high[0] >= close[1]
-TopImbalancesize = low[2] - high[0]
-if TopImbalance and TopImbalancesize > 0 and time >= reqDate
-    BOX1 = box.new(left=bar_index[1], top=low[2], right=bar_index[0], bottom=high[0])
-    box.set_bgcolor(BOX1, Imbcol )
-    box.set_border_color(BOX1, na )
-    array.push(top_boxes, BOX1)
-
-BottomInbalance = high[2] >= open[1] and low[0] <= close[1]
-BottomInbalancesize = low[0] - high[2]
-if BottomInbalance and BottomInbalancesize > 0 and time >= reqDate
-    BOX2 = box.new(left=bar_index[1], top=low[0], right=bar_index[0], bottom=high[2])
-    box.set_bgcolor(BOX2, Imbcol )
-    box.set_border_color(BOX2, na )
-    array.push(bottom_boxes, BOX2)
-
-if barstate.isconfirmed
-    if array.size(top_boxes) > 0
-        for i = array.size(top_boxes) - 1 to 0 by 1
-            tbox = array.get(top_boxes, i)
-            top = box.get_top(tbox)
-            bottom = box.get_bottom(tbox)
-            ago = box.get_left(tbox)
-            if imb_extend
-                box.set_right(tbox, bar_index)
-            if high > top
-                box.set_bgcolor(tbox, Imbcol_tested)
-                if imb_extend
-                    box.set_right(tbox, ago+1)
-                array.remove(top_boxes, i)
-                continue
-            if high > bottom //and ago < 5000
-                matched := false
-                asize = array.size(tested_obs)
-                if asize > 0
-                    for j = asize - 1 to 0 by 1
-                        tbox2 = array.get(tested_obs, j)
-                        ago2 = box.get_left(tbox2)
-                        if ago==ago2
-                            matched := true
-                            box.set_bottom(tbox, high)
-                            if imb_extend
-                                box.set_right(tbox, ago+1)
-                            box.set_top(tbox2, high)
-                            break
-                if not matched
-                    BOX3 = box.copy(tbox)
-                    box.set_top(BOX3, high)
-                    box.set_bgcolor(BOX3, Imbcol_tested)
-                    if imb_extend
-                        box.set_right(BOX3, ago+1)
-                    array.push(tested_obs, BOX3)
-                    box.set_bottom(tbox, high)
-
-    if array.size(bottom_boxes) > 0
-        for i = array.size(bottom_boxes) - 1 to 0 by 1
-            tbox = array.get(bottom_boxes, i)
-            top = box.get_top(tbox)
-            bottom = box.get_bottom(tbox)
-            ago = box.get_left(tbox)
-            if imb_extend
-                box.set_right(tbox, bar_index)
-            if low < bottom
-                box.set_bgcolor(tbox, Imbcol_tested)
-                if imb_extend
-                    box.set_right(tbox, ago+1)
-                array.remove(bottom_boxes, i)
-                continue
-            if low < top //and ago < 5000
-                matched := false
-                asize = array.size(tested_obs)
-                if asize > 0
-                    for j = asize - 1 to 0 by 1
-                        tbox2 = array.get(tested_obs, j)
-                        ago2 = box.get_left(tbox2)
-                        if ago==ago2
-                            matched := true
-                            box.set_top(tbox, low)
-                            box.set_bottom(tbox2, low)
-                            break
-                if not matched
-                    BOX4 = box.copy(tbox)
-                    box.set_bottom(BOX4, low)
-                    box.set_bgcolor(BOX4, Imbcol_tested)
-                    if imb_extend
-                        box.set_right(BOX4, ago+1)
-                    array.push(tested_obs, BOX4)
-                    box.set_top(tbox, low)
-
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
-// ║     main finish (dynamic imbalance)                                          ║
-// ║                                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                                                                              ║
 // ║     main start (key levels)                                                  ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-displayStyle = input.string(defval='Standard', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display', group="/// KEY LEVELS ///")
+displayStyle = input.string(defval='Right Anchored', title='Display Style', options=['Standard', 'Right Anchored'], inline='Display', group="/// KEY LEVELS ///")
 mergebool = input.bool(defval=true, title='Merge Levels?', inline='Display', group="/// KEY LEVELS ///")
-distanceright = input.int(defval=125, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
-radistance = input.int(defval=25, title='Anchor Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+distanceright = input.int(defval=100, title='Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
+radistance = input.int(defval=30, title='Anchor Distance', minval=5, maxval=500, inline='Dist', group="/// KEY LEVELS ///")
 labelsize = input.string(defval='Medium', title='Text Size', options=['Small', 'Medium', 'Large'], group="/// KEY LEVELS ///")
 linesize = input.string(defval='Small', title='Line Width', options=['Small', 'Medium', 'Large'], inline='Line', group="/// KEY LEVELS ///")
 linestyle = input.string(defval='Solid', title='Line Style', options=['Solid', 'Dashed', 'Dotted'], inline='Line', group="/// KEY LEVELS ///")
@@ -2057,5 +1916,424 @@ if i_show_2
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║                                                                              ║
 // ║     main finish (project name)                                               ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (dynamic imbalance)                                           ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+var box[]   top_boxes     = array.new_box()
+var box[]   bottom_boxes     = array.new_box()
+var box[]   tested_obs = array.new_box()
+var bool matched = false
+
+color imb = color.new(#630cff,70)
+color imb_tested = color.new(color.red,60)
+
+tf = timeframe.isdaily ? 1440 : (timeframe.isweekly ? 1440*7 : (timeframe.ismonthly ? 1440*7*30 : 1))
+reqDate = timenow - 199999999*timeframe.multiplier*tf
+Imbcol = input.color(imb, 'Imbalance Color', inline="1" ,group='=== Information ===')
+Imbcol_tested = input.color(imb_tested, 'Mitigated Imbalance', inline="2" ,group='=== Information ===')
+imb_extend = input.bool(false, "Auto-extend Untested imbalance",group='=== Information ===')
+TopImbalance = low[2] <= open[1] and high[0] >= close[1]
+TopImbalancesize = low[2] - high[0]
+if TopImbalance and TopImbalancesize > 0 and time >= reqDate
+    BOX1 = box.new(left=bar_index[1], top=low[2], right=bar_index[0], bottom=high[0])
+    box.set_bgcolor(BOX1, Imbcol )
+    box.set_border_color(BOX1, na )
+    array.push(top_boxes, BOX1)
+
+BottomInbalance = high[2] >= open[1] and low[0] <= close[1]
+BottomInbalancesize = low[0] - high[2]
+if BottomInbalance and BottomInbalancesize > 0 and time >= reqDate
+    BOX2 = box.new(left=bar_index[1], top=low[0], right=bar_index[0], bottom=high[2])
+    box.set_bgcolor(BOX2, Imbcol )
+    box.set_border_color(BOX2, na )
+    array.push(bottom_boxes, BOX2)
+
+if barstate.isconfirmed
+    if array.size(top_boxes) > 0
+        for i = array.size(top_boxes) - 1 to 0 by 1
+            tbox = array.get(top_boxes, i)
+            top = box.get_top(tbox)
+            bottom = box.get_bottom(tbox)
+            ago = box.get_left(tbox)
+            if imb_extend
+                box.set_right(tbox, bar_index)
+            if high > top
+                box.set_bgcolor(tbox, Imbcol_tested)  
+                if imb_extend 
+                    box.set_right(tbox, ago+1)
+                array.remove(top_boxes, i)
+                continue
+            if high > bottom //and ago < 5000
+                matched := false
+                asize = array.size(tested_obs)
+                if asize > 0
+                    for j = asize - 1 to 0 by 1
+                        tbox2 = array.get(tested_obs, j)
+                        ago2 = box.get_left(tbox2)
+                        if ago==ago2
+                            matched := true
+                            box.set_bottom(tbox, high)
+                            if imb_extend
+                                box.set_right(tbox, ago+1)
+                            box.set_top(tbox2, high)
+                            break
+                if not matched
+                    BOX3 = box.copy(tbox)
+                    box.set_top(BOX3, high)
+                    box.set_bgcolor(BOX3, Imbcol_tested) 
+                    if imb_extend  
+                        box.set_right(BOX3, ago+1)
+                    array.push(tested_obs, BOX3)
+                    box.set_bottom(tbox, high)
+
+    if array.size(bottom_boxes) > 0
+        for i = array.size(bottom_boxes) - 1 to 0 by 1
+            tbox = array.get(bottom_boxes, i)
+            top = box.get_top(tbox)
+            bottom = box.get_bottom(tbox)
+            ago = box.get_left(tbox)
+            if imb_extend
+                box.set_right(tbox, bar_index)
+            if low < bottom 
+                box.set_bgcolor(tbox, Imbcol_tested) 
+                if imb_extend
+                    box.set_right(tbox, ago+1)  
+                array.remove(bottom_boxes, i)
+                continue
+            if low < top //and ago < 5000
+                matched := false
+                asize = array.size(tested_obs)
+                if asize > 0
+                    for j = asize - 1 to 0 by 1
+                        tbox2 = array.get(tested_obs, j)
+                        ago2 = box.get_left(tbox2)
+                        if ago==ago2
+                            matched := true
+                            box.set_top(tbox, low)
+                            box.set_bottom(tbox2, low)
+                            break
+                if not matched
+                    BOX4 = box.copy(tbox)
+                    box.set_bottom(BOX4, low)
+                    box.set_bgcolor(BOX4, Imbcol_tested)  
+                    if imb_extend
+                        box.set_right(BOX4, ago+1) 
+                    array.push(tested_obs, BOX4)
+                    box.set_top(tbox, low)
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (dynamic imbalance)                                          ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main start (super orderblock)                                            ║
+// ║                                                                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+plotOB = input.bool(defval=true, title='Plot OB', group='Order Blocks')
+obBullColor = input.color(defval=color.new(color.green, 90), title='Bullish OB Color', inline='Set Custom Color', group='Order Blocks')
+obBearColor = input.color(defval=color.new(color.red, 90), title='Bearish OB Color', inline='Set Custom Color', group='Order Blocks')
+obBoxBorder = input.string(defval=line.style_solid, title='OB Box Border Style', options=[line.style_dashed, line.style_dotted, line.style_solid], group='Order Blocks', tooltip='To disable border, set Border Width below to 0')
+obBorderTransparency = input.int(defval=80, title='OB Border Box Transparency', minval=0, maxval=100, group='Order Blocks')
+obMaxBoxSet = input.int(defval=10, title='Maximum OB Box Displayed', minval=1, maxval=100, group='Order Blocks', tooltip='Minimum = 1, Maximum = 100')
+filterMitOB = input.bool(defval=true, title='Custom Color Mitigated OB', group='Order Blocks')
+mitOBColor = input.color(defval=color.new(color.gray, 90), title='Mitigated OB Color', group='Order Blocks', inline='Set Custom Color Mit OB', tooltip='Set Transparency to 0 to make mitigated OB disappear')
+
+plotFVG = input.bool(defval=true, title='Plot FVG', group='Fair Value Gaps', inline='FVG sets')
+plotStructureBreakingFVG = input.bool(defval=false, title='Plot Structure Breaking FVG', group='Fair Value Gaps', inline='FVG sets')
+fvgBullColor = input.color(defval=color.new(#630cff, 70), title='Bullish FVG Color', inline='Set Custom Color', group='Fair Value Gaps')
+fvgBearColor = input.color(defval=color.new(#630cff, 70), title='Bearish FVG Color', inline='Set Custom Color', group='Fair Value Gaps')
+fvgStructBreakingColor = input.color(defval=color.new(color.blue, 90), title='Structure Breaking FVG Color', inline='Set Custom Color', group='Fair Value Gaps')
+fvgBoxBorder = input.string(defval=line.style_solid, title='FVG Box Border Style', options=[line.style_dashed, line.style_dotted, line.style_solid], group='Fair Value Gaps', tooltip='To disable border, set Border Width below to 0')
+fvgBorderTransparency = input.int(defval=80, title='FVG Border Box Transparency', minval=0, maxval=100, group='Fair Value Gaps')
+fvgMaxBoxSet = input.int(defval=10, title='Maximum FVG Box Displayed', minval=1, maxval=100, group='Fair Value Gaps', tooltip='Minimum = 1, Maximum = 100')
+filterMitFVG = input.bool(defval=true, title='Custom Color Mitigated FVG', group='Fair Value Gaps')
+mitFVGColor = input.color(defval=color.new(#ff5252, 60), title='Mitigated FVG Color', group='Fair Value Gaps', inline='Set Custom Color Mit FVG', tooltip='Set Transparency to 0 to make mitigated FVG disappear')
+
+plotRJB = input.bool(defval=false, title='Plot RJB', group='Rejection Blocks', inline='RJB sets')
+rjbBullColor = input.color(defval=color.new(color.green, 90), title='Bullish RJB Color', inline='Set Custom Color', group='Rejection Blocks')
+rjbBearColor = input.color(defval=color.new(color.red, 90), title='Bearish RJB Color', inline='Set Custom Color', group='Rejection Blocks')
+rjbBoxBorder = input.string(defval=line.style_solid, title='RJB Box Border Style', options=[line.style_dashed, line.style_dotted, line.style_solid], group='Rejection Blocks', tooltip='To disable border, set Border Width below to 0')
+rjbBorderTransparency = input.int(defval=80, title='RJB Border Box Transparency', minval=0, maxval=100, group='Rejection Blocks')
+rjbMaxBoxSet = input.int(defval=10, title='Maximum RJB Box Displayed', minval=1, maxval=100, group='Rejection Blocks', tooltip='Minimum = 1, Maximum = 100')
+filterMitRJB = input.bool(defval=false, title='Custom Color Mitigated RJB', group='Rejection Blocks')
+mitRJBColor = input.color(defval=color.new(color.gray, 90), title='Mitigated RJB Color', group='Rejection Blocks', inline='Set Custom Color Mit RJB', tooltip='Set to 100 to make mitigated RJB disappear')
+
+plotPVT = input.bool(defval=false, title='Plot Pivots', group='Pivots')
+pivotLookup  = input.int(defval=1, minval=1, maxval=5,title='Pivot Lookup', group='Pivots', tooltip='Minimum = 1, Maximum = 5')
+pvtTopColor = input.color(defval=color.new(color.silver, 0), title='Pivot Top Color', group='Pivots', inline='PVT Color')
+pvtBottomColor = input.color(defval=color.new(color.silver, 0), title='Pivot Bottom Color', group='Pivots', inline='PVT Color')
+
+plotBOS = input.bool(defval=false, title='Plot BoS', group='Crossovers', inline='BOS sets')
+useHighLowForBullishBoS = input.bool(defval=false, title='Use High/Low for Bullish BoS (for Bearish setup)', group='Crossovers')
+useHighLowForBearishBoS = input.bool(defval=false, title='Use High/Low for Bearish BoS (for Bullish setup)', group='Crossovers')
+bosBoxFlag  = input.bool(title='BoS Box Length Manually', defval=false, group='Crossovers', tooltip='If activated the BoS Boxes will not extend unitl crossed by price. Instead will extend by the amount of bars choosen in the "Set BoS Box Length Manually" option')
+bosBoxLength  = input.int(title='BoS Box Length Manually', defval=3, minval=1, maxval=5, group='Crossovers', inline='BoS Boxes', tooltip='If "Set BoS Box Length Manually" is marked, choose by how many bars. Minimum = 1, Maximum = 5')
+bosBullColor = input.color(defval=color.new(color.green, 90), title='Bullish BoS Color', inline='Set Custom Color', group='Crossovers')
+bosBearColor = input.color(defval=color.new(color.red, 90), title='Bearish BoS Color', inline='Set Custom Color', group='Crossovers')
+bosBoxBorder = input.string(defval=line.style_solid, title='BoS Box Border Style', options=[line.style_dashed, line.style_dotted, line.style_solid], group='Crossovers', tooltip='To disable border, set Border Width below to 0')
+bosBorderTransparency = input.int(defval=80, title='BoS Border Box Transparency', minval=0, maxval=100, group='Crossovers')
+bosMaxBoxSet = input.int(defval=10, title='Maximum BoS Box Displayed', minval=1, maxval=100, group='Crossovers', tooltip='Minimum = 1, Maximum = 100')
+
+plotHVB = input.bool(defval=false, title='Plot HVB', group='High Volume Bar', tooltip='A candle where the average volume is higher than last few bars.')
+hvbBullColor = input.color(defval=color.green, title='Bullish HVB Color', inline='Set Custom Color', group='High Volume Bar')
+hvbBearColor = input.color(defval=color.red, title='Bearish HVB Color', inline='Set Custom Color', group='High Volume Bar')
+hvbEMAPeriod = input.int(defval=12, minval=1, title='Volume EMA Period', group='High Volume Bar')
+hvbMultiplier = input.float(defval=1.5, title='Volume Multiplier', minval=1, maxval=100, group='High Volume Bar')
+
+plotPPDD = input.bool(defval=false, title="Plot PPDD OB's", group='Qualitative indicators', tooltip='Premium Premium Discount Discount (PPDD) is an OB formed after liquidity sweep. It will show up by default as a triangle (Bull ▲ / Bear ▼). Also PPDD1 (by deafult maked with a x-cross ⨯) which is a weak OB formed after liquidity sweep, that fails to completely engulf the high/low, but closes beyond the trapped candles open price.')
+ppddBullColor = input.color(defval=color.new(color.green, 0), title="Bullish PPDD OB's Color", group='Qualitative indicators', inline='PPDD Color')
+ppddBearColor = input.color(defval=color.new(color.red, 0), title="Bearish PPDD OB's Color", group='Qualitative indicators', inline='PPDD Color')
+
+plotOBFVG = input.bool(defval=false, title='Plot Stacked OB+FVG', group='Qualitative indicators', tooltip='Marks the candle (default with a diamond ◆) when an OB & FVG are stacked, showing momentum')
+obfvgBullColor = input.color(defval=color.new(color.green, 0), title='Bullish Stacked OB+FVG Color', group='Qualitative indicators', inline='OBFVG Color')
+obfvgBearColor = input.color(defval=color.new(color.red, 0), title='Bearish Stacked OB+FVG Color', group='Qualitative indicators', inline='OBFVG Color')
+
+plotLabelOB = input.bool(defval=true, title='Plot OB Label', inline='OB label', group='Label Options')
+obLabelColor = input.color(defval=color.gray, title='Color', inline='OB label', group='Label Options')
+obLabelSize = input.string(defval=size.small, title="Size", options=[size.huge, size.large, size.small, size.tiny, size.auto, size.normal], inline='OB label', group='Label Options')
+plotLabelFVG = input.bool(defval=true, title='Plot FVG Label', inline='FVG label', group='Label Options')
+fvgLabelColor = input.color(defval=color.gray, title='Color', inline='FVG label', group='Label Options')
+fvgLabelSize = input.string(defval=size.tiny, title="Size", options=[size.huge, size.large, size.small, size.tiny, size.auto, size.normal], inline='FVG label', group='Label Options')
+plotLabelRJB = input.bool(defval=true, title='Plot RJB Label', inline='RJB label', group='Label Options')
+rjbLabelColor = input.color(defval=color.gray, title='Color', inline='RJB label', group='Label Options')
+rjbLabelSize = input.string(defval=size.tiny, title="Size", options=[size.huge, size.large, size.small, size.tiny, size.auto, size.normal], inline='RJB label', group='Label Options')
+plotLabelBOS = input.bool(defval=true, title='Plot BoS Label', inline='BOS label', group='Label Options')
+bosLabelColor = input.color(defval=color.gray, title='Color', inline='BOS label', group='Label Options')
+bosLabelSize = input.string(defval=size.tiny, title="Size", options=[size.huge, size.large, size.small, size.tiny, size.auto, size.normal], inline='BOS label', group='Label Options')
+
+//Box Types
+var int _ob  = 1
+var int _fvg = 2
+var int _rjb = 3
+var int _bos = 4
+
+//Box Labels
+var string _obLabel  = "OB"
+var string _fvgLabel = "FVG"
+var string _rjbLabel = "RJB"
+var string _bosLabel = "BoS"
+var string _plus     = "+"
+var string _minus    = "-"
+var string _empty    = ""
+
+//Box Arrays
+var box[] _bearBoxesOB  = array.new_box()
+var box[] _bullBoxesOB  = array.new_box()
+var box[] _bearBoxesFVG = array.new_box()
+var box[] _bullBoxesFVG = array.new_box()
+var box[] _bearBoxesRJB = array.new_box()
+var box[] _bullBoxesRJB = array.new_box()
+var box[] _bearBoxesBOS = array.new_box()
+var box[] _bullBoxesBOS = array.new_box()
+
+//Functions
+isUp(index) =>
+    close[index] > open[index]
+
+isDown(index) =>
+    close[index] < open[index]
+
+isObUp(index) =>
+    isDown(index + 1) and isUp(index) and close[index] > high[index + 1]
+
+isObDown(index) =>
+    isUp(index + 1) and isDown(index) and close[index] < low[index + 1]
+
+isFvgUp(index) =>
+    (low[index] > high[index + 2])
+
+isFvgDown(index) =>
+    (high[index] < low[index + 2])
+
+//Function to Calculte Box Length
+_controlBox(_boxes, _high, _low, _type) =>
+    if array.size(_boxes) > 0
+        for i = array.size(_boxes) - 1 to 0 by 1
+            _box = array.get(_boxes, i)
+            _boxLow = box.get_bottom(_box)
+            _boxHigh = box.get_top(_box)
+            _boxRight = box.get_right(_box)
+            if bosBoxFlag and _type == _bos
+                if na or (bar_index + bosBoxLength - 1 == _boxRight and not((_high > _boxLow and _low < _boxLow) or (_high > _boxHigh and _low < _boxHigh)))
+                    box.set_right(_box, bar_index + bosBoxLength - 1)
+            else if (filterMitOB and _type == _ob) or (filterMitFVG and _type == _fvg) or (filterMitRJB and _type == _rjb)
+                if na or (bar_index == _boxRight and not((_high > _boxLow and _low < _boxLow) or (_high > _boxHigh and _low < _boxHigh)))
+                    box.set_right(_box, bar_index + 1)
+                else
+                    if _type == _ob
+                        box.set_bgcolor(_box, mitOBColor)
+                        box.set_border_color(_box, mitOBColor)
+                    else if _type == _fvg
+                        box.set_bgcolor(_box, mitFVGColor)
+                        box.set_border_color(_box, mitFVGColor)
+                    else if _type == _rjb
+                        box.set_bgcolor(_box, mitRJBColor)
+                        box.set_border_color(_box, mitRJBColor)
+            else
+                if na or (bar_index == _boxRight and not((_high > _boxLow and _low < _boxLow) or (_high > _boxHigh and _low < _boxHigh)))
+                    box.set_right(_box, bar_index + 1)
+
+//////////////////// Pivots //////////////////// 
+hih = ta.pivothigh(high, pivotLookup, pivotLookup)
+lol = ta.pivotlow(low , pivotLookup, pivotLookup)
+top = ta.valuewhen(hih, high[pivotLookup], 0)
+bottom = ta.valuewhen(lol, low [pivotLookup], 0)
+plot(top, offset=-pivotLookup, linewidth=1, color=(top != top[1] ? na : (plotPVT ? pvtTopColor : na)), title="Pivot Top")
+plot(bottom, offset=-pivotLookup, linewidth=1, color=(bottom != bottom[1] ? na : (plotPVT ? pvtBottomColor : na)), title="Pivot Bottom")
+
+//////////////////// Order Block //////////////////
+//Bullish OB Box Plotting
+if isObUp(1) and plotOB
+    _bullboxOB = box.new(left=bar_index - 2, top=high[2], right=bar_index, bottom=math.min(low[2], low[1]), border_color=color.new(obBullColor, obBorderTransparency), border_style=obBoxBorder, border_width=1, bgcolor=obBullColor, 
+     text=plotLabelOB ? _obLabel  + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=obLabelSize, text_color=obLabelColor)
+    if array.size(_bullBoxesOB) > obMaxBoxSet
+        box.delete(array.shift(_bullBoxesOB))
+    array.push(_bullBoxesOB, _bullboxOB)
+
+//Bearish OB Box Plotting
+if isObDown(1) and plotOB
+    _bearboxOB = box.new(left=bar_index - 2, top=math.max(high[2], high[1]), right=bar_index, bottom=low[2], border_color=color.new(obBearColor, obBorderTransparency), border_style=obBoxBorder, border_width=1, bgcolor=obBearColor, 
+     text=plotLabelOB ? _obLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=obLabelSize, text_color=obLabelColor)
+    if array.size(_bearBoxesOB) > obMaxBoxSet
+        box.delete(array.shift(_bearBoxesOB))
+    array.push(_bearBoxesOB, _bearboxOB)
+    
+if plotOB
+    _controlBox(_bearBoxesOB, high, low, _ob)
+    _controlBox(_bullBoxesOB, high, low, _ob)
+
+//////////////////// Fair Value Gap //////////////////
+//Bullish FVG Box Plotting
+if isFvgUp(0)
+    box _bullboxFVG = na
+    if plotStructureBreakingFVG and (close[1] > top) and (low[1] < top) and (high[2] < top) and (low > top)
+        _bullboxFVG := box.new(left=bar_index-2, top=low[0], right=bar_index, bottom=high[2], bgcolor=fvgStructBreakingColor, border_color=color.new(fvgStructBreakingColor, fvgBorderTransparency), border_style=fvgBoxBorder, border_width=1,
+         text=plotLabelFVG ? _fvgLabel  + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=fvgLabelSize, text_color=fvgLabelColor)        
+    else if plotFVG   
+        _bullboxFVG := box.new(left=bar_index-2, top=low[0], right=bar_index, bottom=high[2], bgcolor=fvgBullColor, border_color=color.new(fvgBullColor, fvgBorderTransparency), border_style=fvgBoxBorder, border_width=1,
+         text=plotLabelFVG ? _fvgLabel  + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=fvgLabelSize, text_color=fvgLabelColor)    
+    if array.size(_bullBoxesFVG) > fvgMaxBoxSet
+        box.delete(array.shift(_bullBoxesFVG))
+    array.push(_bullBoxesFVG, _bullboxFVG)
+
+//Bearish FVG Box Plotting    
+if isFvgDown(0)
+    box _bearboxFVG = na
+    if plotStructureBreakingFVG and (close[1] < bottom) and (high[1] > bottom) and (low[2] > bottom) and (high < bottom)
+        _bearboxFVG := box.new(left=bar_index-2, top=low[2], right=bar_index, bottom=high[0], bgcolor=fvgStructBreakingColor, border_color=color.new(fvgStructBreakingColor, fvgBorderTransparency), border_style=fvgBoxBorder, border_width=1,
+         text=plotLabelFVG ? _fvgLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=fvgLabelSize, text_color=fvgLabelColor)    
+    else if plotFVG
+        _bearboxFVG := box.new(left=bar_index-2, top=low[2], right=bar_index, bottom=high[0], bgcolor=fvgBearColor, border_color=color.new(fvgBearColor, fvgBorderTransparency), border_style=fvgBoxBorder, border_width=1,
+         text=plotLabelFVG ? _fvgLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=fvgLabelSize, text_color=fvgLabelColor)    
+    if array.size(_bearBoxesFVG) > fvgMaxBoxSet
+        box.delete(array.shift(_bearBoxesFVG))
+    array.push(_bearBoxesFVG, _bearboxFVG)
+    
+if plotFVG or plotStructureBreakingFVG
+    _controlBox(_bearBoxesFVG, high, low, _fvg)
+    _controlBox(_bullBoxesFVG, high, low, _fvg)
+
+//////////////////// Rejection Block //////////////////
+if plotRJB
+    isDownRjbObCondition = isObDown(1)
+    isDownRjb1 = isDownRjbObCondition and  (high[1] < (close[2] + 0.2*(high[2]-close[2]))) // RJB is on trapped's wick and <50% of the wick was covered by signal
+    isDownRjb2 = isDownRjbObCondition and (high[1] > high[2]) // RJB is on signal's wick
+    if isDownRjb1 and plotRJB
+        _bearboxRJB = box.new(left=bar_index-2, top=high[2], right=bar_index, bottom=close[2], bgcolor=rjbBearColor, border_color=color.new(rjbBearColor, rjbBorderTransparency), border_style=rjbBoxBorder, border_width=1,
+         text=plotLabelRJB ? _rjbLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=rjbLabelSize, text_color=rjbLabelColor)
+        if array.size(_bearBoxesRJB) > rjbMaxBoxSet
+            box.delete(array.shift(_bearBoxesRJB))
+        array.push(_bearBoxesRJB, _bearboxRJB)
+        
+    if isDownRjb2 and plotRJB
+        _bearboxRJB = box.new(left=bar_index-1, top=high[1], right=bar_index, bottom=open[1], bgcolor=rjbBearColor, border_color=color.new(rjbBearColor, rjbBorderTransparency), border_style=rjbBoxBorder, border_width=1,
+         text=plotLabelRJB ? _rjbLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=rjbLabelSize, text_color=rjbLabelColor)
+        if array.size(_bearBoxesRJB) > rjbMaxBoxSet
+            box.delete(array.shift(_bearBoxesRJB))
+        array.push(_bearBoxesRJB, _bearboxRJB)
+
+//Bullish RJB Box Plotting
+if plotRJB
+    isUpRjbObCondition = isObUp(1)
+    isUpRjb1 = isUpRjbObCondition and (low[1] > (close[2] - 0.2*(close[2]-low[2]))) // RJB is on trapped's wick and <50% of the wick was covered by signal
+    isUpRjb2 = isUpRjbObCondition and (low[1] < low[2]) // RJB is on signal's wick
+    if isUpRjb1 and plotRJB
+        _bullboxRJB = box.new(left=bar_index-2, top=close[2], right=bar_index, bottom=low[2], bgcolor=rjbBullColor, border_color=color.new(rjbBullColor, rjbBorderTransparency), border_style=rjbBoxBorder, border_width=1,
+         text=plotLabelRJB ? _rjbLabel  + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=rjbLabelSize, text_color=rjbLabelColor)
+        if array.size(_bullBoxesRJB) > rjbMaxBoxSet
+            box.delete(array.shift(_bullBoxesRJB))
+        array.push(_bullBoxesRJB, _bullboxRJB)
+    
+    if isUpRjb2 and plotRJB
+        _bullboxRJB = box.new(left=bar_index-1, top=open[1], right=bar_index, bottom=low[1], bgcolor=rjbBullColor, border_color=color.new(rjbBullColor, rjbBorderTransparency), border_style=rjbBoxBorder, border_width=1, 
+         text=plotLabelRJB ? _rjbLabel  + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=rjbLabelSize, text_color=rjbLabelColor)
+        if array.size(_bullBoxesRJB) > rjbMaxBoxSet
+            box.delete(array.shift(_bullBoxesRJB))
+        array.push(_bullBoxesRJB, _bullboxRJB)
+
+if plotRJB
+    _controlBox(_bearBoxesRJB, high, low, _rjb)
+    _controlBox(_bullBoxesRJB, high, low, _rjb)
+
+//////////////////// Crossovers a.k.a. Break of Structure ////////////////////
+//Bullish BOS Box Plotting
+if plotBOS
+    if ta.crossover(useHighLowForBullishBoS ? high : close, top)
+        _bullboxBOS = box.new(left=bar_index, top=top, right=bosBoxFlag ? bar_index+bosBoxLength : bar_index+1, bottom=bottom, bgcolor=bosBullColor, border_color=color.new(bosBullColor, bosBorderTransparency), border_style=bosBoxBorder, border_width=1, 
+         text=plotLabelBOS ? _bosLabel + _plus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=bosLabelSize, text_color=bosLabelColor)
+        if array.size(_bullBoxesBOS) > bosMaxBoxSet
+            box.delete(array.shift(_bullBoxesBOS))
+        array.push(_bullBoxesBOS, _bullboxBOS)
+
+//Bearish BOS Box Plotting        
+if plotBOS 
+    if ta.crossunder(useHighLowForBearishBoS ? low : close, bottom)
+        _bearboxBOS = box.new(left=bar_index, top=top, right=bosBoxFlag ? bar_index+bosBoxLength : bar_index+1, bottom=bottom, bgcolor=bosBearColor, border_color=color.new(bosBearColor, bosBorderTransparency), border_style=bosBoxBorder, border_width=1, 
+         text=plotLabelBOS ? _bosLabel  + _minus : _empty, text_halign=text.align_right, text_valign=text.align_bottom, text_size=bosLabelSize, text_color=bosLabelColor)
+        if array.size(_bearBoxesBOS) > bosMaxBoxSet
+            box.delete(array.shift(_bearBoxesBOS))
+        array.push(_bearBoxesBOS, _bearboxBOS)
+
+if plotBOS
+    _controlBox(_bearBoxesBOS, high, low, _bos)
+    _controlBox(_bullBoxesBOS, high, low, _bos)
+
+//////////////////// Premium Premium & Discount Discount //////////////////
+premiumPremium = plotPPDD and isObDown(0) and ((math.max(high, high[1]) > top and close < top) or (math.max(high, high[1]) > top[1] and close < top[1]))
+discountDiscount = plotPPDD and isObUp(0) and ((math.min(low, low[1]) < bottom and close > bottom) or (math.min(low, low[1]) < bottom[1] and close > bottom[1]))
+plotshape(premiumPremium, "Bearish PPDD OB", style=shape.triangledown , location=location.abovebar, color=ppddBearColor, size=size.tiny)
+plotshape(discountDiscount, "Bullish PPDD OB", style=shape.triangleup , location=location.belowbar, color=ppddBullColor, size=size.tiny)
+
+premiumPremium1 = plotPPDD and (isUp(1) and isDown(0) and close[0] < open[1]) and ((math.max(high, high[1]) > top and close < top) or (math.max(high, high[1]) > top[1] and close < top[1])) and not premiumPremium
+discountDiscount1 = plotPPDD and (isDown(1) and isUp(0) and close[0] > open[1]) and ((math.min(low, low[1]) < bottom and close > bottom) or (math.min(low, low[1]) < bottom[1] and close > bottom[1])) and not discountDiscount
+plotshape(premiumPremium1, "Bearish PPDD Weak OB", style=shape.xcross, location=location.abovebar, color=ppddBearColor, size=size.tiny)
+plotshape(discountDiscount1, "Bullish PPDD Weak OB", style=shape.xcross, location=location.belowbar, color=ppddBullColor, size=size.tiny)
+
+////////////////// High Volume Bars //////////////////
+volEma = ta.ema(volume, hvbEMAPeriod)
+isHighVolume = volume > (hvbMultiplier * volEma)
+barcolor(plotHVB and isUp(0) and isHighVolume ? hvbBullColor : na, title="Bullish HVB")
+barcolor(plotHVB and isDown(0) and isHighVolume ? hvbBearColor : na, title="Bearish HVB")
+
+///////////////// Stacked OB + FVG //////////////////
+plotshape(plotOBFVG and isFvgDown(0) and isObDown(1), "Bearish OB+FVG Stack", style=shape.diamond, location=location.abovebar, color=obfvgBearColor, size=size.tiny)
+plotshape(plotOBFVG and isFvgUp(0) and isObUp(1), "Bullish OB+FVG Stack", style=shape.diamond, location=location.belowbar, color=obfvgBullColor, size=size.tiny)
+
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                                                                              ║
+// ║     main finish (super orderblock)                                           ║
 // ║                                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
